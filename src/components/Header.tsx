@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Hand, Scan, BookOpen, GraduationCap, Type } from "lucide-react";
+import { Hand, Scan, BookOpen, GraduationCap, Type, Hash } from "lucide-react";
 import { motion } from "framer-motion";
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { path: "/gestures", label: "Gestures", icon: BookOpen },
   { path: "/train", label: "Train", icon: GraduationCap },
   { path: "/alphabet", label: "Alphabet", icon: Type },
+  { path: "/numbers", label: "Numbers", icon: Hash },
 ];
 
 export default function Header() {

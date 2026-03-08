@@ -28,9 +28,9 @@ import { toast } from "sonner";
 const VIDEO_WIDTH = 640;
 const VIDEO_HEIGHT = 480;
 
-const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const NUMBERS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
-export default function AlphabetMode() {
+export default function NumbersMode() {
   const [activeTab, setActiveTab] = useState("train");
 
   return (
@@ -42,10 +42,10 @@ export default function AlphabetMode() {
       >
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold font-display">
-            Alphabet <span className="text-gradient">Mode</span>
+            Numbers <span className="text-gradient">Mode</span>
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Train sign language alphabets, then detect letters to form words
+            Train sign language numbers, then detect digits to form numbers
           </p>
         </div>
 
@@ -62,10 +62,10 @@ export default function AlphabetMode() {
           </TabsList>
 
           <TabsContent value="train">
-            <AlphabetTrain />
+            <NumbersTrain />
           </TabsContent>
           <TabsContent value="detect">
-            <AlphabetDetect />
+            <NumbersDetect />
           </TabsContent>
         </Tabs>
       </motion.div>
@@ -74,25 +74,24 @@ export default function AlphabetMode() {
 }
 
 /* ─── TRAIN TAB ─── */
-function AlphabetTrain() {
+function NumbersTrain() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { isLoading, isRunning, landmarks, error, start, stop } = useHandDetection();
 
-  const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
-  const [capturePhase, setCapturePhase] = useState<"idle" | "right" | "left" | "done">("idle");
+  const [selectedNumber, setSelectedNumber] = useState<string | null>(null);
+  const [capturePhase, setCapturePhase] = useState<"idle" | "right" | "done">("idle");
   const [samples, setSamples] = useState<Landmark[][]>([]);
-  const [trainedLetters, setTrainedLetters] = useState<Set<string>>(new Set());
+  const [trainedNumbers, setTrainedNumbers] = useState<Set<string>>(new Set());
 
-  // Load already trained letters
   useEffect(() => {
     getAllGestures().then((gestures) => {
       const trained = new Set<string>();
       gestures.forEach((g) => {
-        if (g.name.startsWith("alpha_")) {
-          trained.add(g.name.replace("alpha_", ""));
+        if (g.name.startsWith("num_")) {
+          trained.add(g.name.replace("num_", ""));
         }
       });
-      setTrainedLetters(trained);
+      setTrainedNumbers(trained);
     });
   }, []);
 
@@ -114,17 +113,17 @@ function AlphabetTrain() {
     setSamples([]);
   }, []);
 
-  const selectLetter = useCallback((letter: string) => {
-    setSelectedLetter(letter);
+  const selectNumber = useCallback((num: string) => {
+    setSelectedNumber(num);
     resetCapture();
   }, [resetCapture]);
 
   const startCapturing = useCallback(() => {
-    if (!selectedLetter) return;
+    if (!selectedNumber) return;
     resetCapture();
     setCapturePhase("right");
-    toast.info(`Show the sign for "${selectedLetter}" and click Capture.`);
-  }, [selectedLetter, resetCapture]);
+    toast.info(`Show the sign for "${selectedNumber}" and click Capture.`);
+  }, [selectedNumber, resetCapture]);
 
   const captureSample = useCallback(() => {
     if (!landmarks || landmarks.length === 0) {
@@ -134,42 +133,42 @@ function AlphabetTrain() {
     const lm = landmarks[0];
     setSamples([[...lm]]);
     setCapturePhase("done");
-    toast.success(`✋ Hand captured for "${selectedLetter}"! Ready to save.`);
-  }, [landmarks, selectedLetter]);
+    toast.success(`✋ Hand captured for "${selectedNumber}"! Ready to save.`);
+  }, [landmarks, selectedNumber]);
 
   const handleSave = useCallback(async () => {
-    if (!selectedLetter || samples.length < 1) return;
+    if (!selectedNumber || samples.length < 1) return;
     const gesture: StoredGesture = {
-      id: `alpha_${selectedLetter}_${Date.now()}`,
-      name: `alpha_${selectedLetter}`,
-      emoji: selectedLetter,
+      id: `num_${selectedNumber}_${Date.now()}`,
+      name: `num_${selectedNumber}`,
+      emoji: selectedNumber,
       hand: "right" as HandType,
       samples,
       createdAt: Date.now(),
     };
     await saveGesture(gesture);
-    setTrainedLetters((prev) => new Set([...prev, selectedLetter]));
+    setTrainedNumbers((prev) => new Set([...prev, selectedNumber]));
     setCapturePhase("idle");
     setSamples([]);
-    toast.success(`Letter "${selectedLetter}" trained successfully!`);
-  }, [selectedLetter, samples]);
+    toast.success(`Number "${selectedNumber}" trained successfully!`);
+  }, [selectedNumber, samples]);
 
-  const handleDeleteLetter = useCallback(async (letter: string) => {
+  const handleDeleteNumber = useCallback(async (num: string) => {
     const all = await getAllGestures();
-    const toDelete = all.filter((g) => g.name === `alpha_${letter}`);
+    const toDelete = all.filter((g) => g.name === `num_${num}`);
     for (const g of toDelete) {
       await deleteGesture(g.id);
     }
-    setTrainedLetters((prev) => {
+    setTrainedNumbers((prev) => {
       const next = new Set(prev);
-      next.delete(letter);
+      next.delete(num);
       return next;
     });
-    if (selectedLetter === letter) {
+    if (selectedNumber === num) {
       resetCapture();
     }
-    toast.success(`Letter "${letter}" deleted.`);
-  }, [selectedLetter, resetCapture]);
+    toast.success(`Number "${num}" deleted.`);
+  }, [selectedNumber, resetCapture]);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
@@ -194,17 +193,16 @@ function AlphabetTrain() {
                 )}
               </div>
               <p className="text-sm text-muted-foreground font-mono">
-                {isLoading ? "Loading AI model..." : "Start camera to train alphabets"}
+                {isLoading ? "Loading AI model..." : "Start camera to train numbers"}
               </p>
             </div>
           )}
 
-          {/* Capture instruction overlay */}
           {capturePhase === "right" && (
             <div className="absolute top-0 left-0 right-0 bg-background/90 backdrop-blur-sm p-4 border-b border-primary/30 z-10">
               <div className="text-center space-y-1">
                 <p className="text-2xl font-bold font-display text-primary">
-                  {selectedLetter}
+                  {selectedNumber}
                 </p>
                 <p className="text-lg font-bold font-display text-accent">
                   ✋ Show your hand sign
@@ -228,17 +226,17 @@ function AlphabetTrain() {
             ) : (
               <Button onClick={handleStop} variant="destructive" className="flex-1">
                 <Square className="mr-2 h-4 w-4" />
-                Stop
+                Stop Camera
               </Button>
             )}
           </div>
 
-          {isRunning && selectedLetter && capturePhase !== "done" && (
+          {isRunning && selectedNumber && capturePhase !== "done" && (
             <div className="flex gap-3">
               {capturePhase === "idle" ? (
                 <Button onClick={startCapturing} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90">
                   <Camera className="mr-2 h-4 w-4" />
-                  Start Training "{selectedLetter}"
+                  Start Training "{selectedNumber}"
                 </Button>
               ) : (
                 <Button
@@ -253,7 +251,6 @@ function AlphabetTrain() {
             </div>
           )}
 
-          {/* Save */}
           <AnimatePresence>
             {capturePhase === "done" && (
               <motion.div
@@ -263,10 +260,10 @@ function AlphabetTrain() {
               >
                 <div className="flex items-center gap-2 text-sm text-accent">
                   <CheckCircle2 className="h-4 w-4" />
-                  <span className="font-medium">Hand sign captured for "{selectedLetter}"!</span>
+                  <span className="font-medium">Hand sign captured for "{selectedNumber}"!</span>
                 </div>
                 <Button onClick={handleSave} className="w-full gap-2">
-                  Save Letter "{selectedLetter}"
+                  Save Number "{selectedNumber}"
                 </Button>
               </motion.div>
             )}
@@ -274,21 +271,21 @@ function AlphabetTrain() {
         </div>
       </div>
 
-      {/* Sidebar — alphabet grid */}
+      {/* Sidebar — number grid */}
       <div className="space-y-4">
         <div className="rounded-2xl border border-border bg-card p-5">
           <h3 className="mb-4 text-xs font-mono uppercase tracking-wider text-muted-foreground">
-            Select Letter to Train
+            Select Number to Train
           </h3>
-          <div className="grid grid-cols-6 gap-2">
-            {ALPHABET.map((letter) => {
-              const isTrained = trainedLetters.has(letter);
-              const isSelected = selectedLetter === letter;
+          <div className="grid grid-cols-5 gap-2">
+            {NUMBERS.map((num) => {
+              const isTrained = trainedNumbers.has(num);
+              const isSelected = selectedNumber === num;
               return (
                 <button
-                  key={letter}
-                  onClick={() => selectLetter(letter)}
-                  className={`relative flex h-10 w-full items-center justify-center rounded-lg text-sm font-bold font-mono transition-all ${
+                  key={num}
+                  onClick={() => selectNumber(num)}
+                  className={`relative flex h-12 w-full items-center justify-center rounded-lg text-lg font-bold font-mono transition-all ${
                     isSelected
                       ? "bg-primary text-primary-foreground ring-2 ring-primary/50"
                       : isTrained
@@ -296,7 +293,7 @@ function AlphabetTrain() {
                         : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
                   }`}
                 >
-                  {letter}
+                  {num}
                   {isTrained && (
                     <CheckCircle2 className="absolute -top-1 -right-1 h-3.5 w-3.5 text-accent" />
                   )}
@@ -316,31 +313,29 @@ function AlphabetTrain() {
           </div>
         </div>
 
-        {/* Trained count */}
         <div className="rounded-2xl border border-border bg-card p-5">
           <h3 className="mb-2 text-xs font-mono uppercase tracking-wider text-muted-foreground">
             Progress
           </h3>
           <p className="text-2xl font-bold font-display text-foreground">
-            {trainedLetters.size}<span className="text-muted-foreground text-lg">/{ALPHABET.length}</span>
+            {trainedNumbers.size}<span className="text-muted-foreground text-lg">/{NUMBERS.length}</span>
           </p>
           <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
             <div
               className="h-full rounded-full bg-accent transition-all"
-              style={{ width: `${(trainedLetters.size / ALPHABET.length) * 100}%` }}
+              style={{ width: `${(trainedNumbers.size / NUMBERS.length) * 100}%` }}
             />
           </div>
 
-          {/* Delete trained letter */}
-          {selectedLetter && trainedLetters.has(selectedLetter) && (
+          {selectedNumber && trainedNumbers.has(selectedNumber) && (
             <Button
               variant="destructive"
               size="sm"
               className="mt-3 w-full gap-2"
-              onClick={() => handleDeleteLetter(selectedLetter)}
+              onClick={() => handleDeleteNumber(selectedNumber)}
             >
               <Trash2 className="h-3.5 w-3.5" />
-              Re-train "{selectedLetter}"
+              Re-train "{selectedNumber}"
             </Button>
           )}
         </div>
@@ -350,79 +345,75 @@ function AlphabetTrain() {
 }
 
 /* ─── DETECT TAB ─── */
-function AlphabetDetect() {
+function NumbersDetect() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { isLoading, isRunning, landmarks, error, start, stop } = useHandDetection();
   const [speechEnabled, setSpeechEnabled] = useState(true);
 
-  const [currentLetter, setCurrentLetter] = useState<string | null>(null);
+  const [currentNumber, setCurrentNumber] = useState<string | null>(null);
   const [confidence, setConfidence] = useState(0);
   const [formedText, setFormedText] = useState("");
-  const [letterHistory, setLetterHistory] = useState<string[]>([]);
+  const [digitHistory, setDigitHistory] = useState<string[]>([]);
 
-  const alphabetGesturesRef = useRef<StoredGesture[]>([]);
-  const stableLetterRef = useRef<string | null>(null);
+  const numberGesturesRef = useRef<StoredGesture[]>([]);
+  const stableDigitRef = useRef<string | null>(null);
   const stableCountRef = useRef(0);
   const lastAddedTimeRef = useRef(0);
 
-  const STABLE_FRAMES = 15; // Need 15 consecutive frames (~1.5s) to confirm a letter
-  const ADD_COOLDOWN = 2000; // 2s cooldown between adding letters
+  const STABLE_FRAMES = 15;
+  const ADD_COOLDOWN = 2000;
 
-  // Load alphabet gestures
   useEffect(() => {
     const load = async () => {
       const all = await getAllGestures();
-      alphabetGesturesRef.current = all.filter((g) => g.name.startsWith("alpha_"));
+      numberGesturesRef.current = all.filter((g) => g.name.startsWith("num_"));
     };
     load();
     const interval = setInterval(load, 3000);
     return () => clearInterval(interval);
   }, []);
 
-  // Detection loop
   useEffect(() => {
     if (!isRunning || !landmarks || landmarks.length === 0) {
-      setCurrentLetter(null);
+      setCurrentNumber(null);
       setConfidence(0);
       return;
     }
 
     const lm = landmarks[0] as Landmark[];
-    const alphaGestures = alphabetGesturesRef.current;
-    if (alphaGestures.length === 0) return;
+    const numGestures = numberGesturesRef.current;
+    if (numGestures.length === 0) return;
 
-    const match = matchCustomGesture(lm, alphaGestures);
+    const match = matchCustomGesture(lm, numGestures);
     if (match && match.confidence > 0.3) {
-      const letter = match.name.replace("alpha_", "");
-      setCurrentLetter(letter);
+      const digit = match.name.replace("num_", "");
+      setCurrentNumber(digit);
       setConfidence(match.confidence);
 
-      // Stability check
-      if (letter === stableLetterRef.current) {
+      if (digit === stableDigitRef.current) {
         stableCountRef.current++;
         const now = Date.now();
         if (stableCountRef.current >= STABLE_FRAMES && now - lastAddedTimeRef.current > ADD_COOLDOWN) {
-          // Letter confirmed — add to text
-          setFormedText((prev) => prev + letter);
-          setLetterHistory((prev) => [...prev, letter]);
+          setFormedText((prev) => prev + digit);
+          setDigitHistory((prev) => [...prev, digit]);
           lastAddedTimeRef.current = now;
           stableCountRef.current = 0;
 
           if (speechEnabled && window.speechSynthesis) {
-            const utterance = new SpeechSynthesisUtterance(letter);
+            const utterance = new SpeechSynthesisUtterance(digit);
             utterance.rate = 1;
             utterance.volume = 1;
             window.speechSynthesis.speak(utterance);
           }
         }
       } else {
-        stableLetterRef.current = letter;
+        stableDigitRef.current = digit;
         stableCountRef.current = 1;
       }
     } else {
-      setCurrentLetter(null);
+      setCurrentNumber(null);
       setConfidence(0);
-      stableLetterRef.current = null;
+      stableDigitRef.current = null;
       stableCountRef.current = 0;
     }
   }, [landmarks, isRunning, speechEnabled]);
@@ -437,32 +428,26 @@ function AlphabetDetect() {
       videoRef.current.srcObject = null;
       videoRef.current.load();
     }
-    setCurrentLetter(null);
+    setCurrentNumber(null);
     setConfidence(0);
   }, [stop]);
 
-  const addSpace = useCallback(() => {
-    setFormedText((prev) => prev + " ");
-    setLetterHistory((prev) => [...prev, "␣"]);
-  }, []);
-
   const deleteLastChar = useCallback(() => {
     setFormedText((prev) => prev.slice(0, -1));
-    setLetterHistory((prev) => prev.slice(0, -1));
+    setDigitHistory((prev) => prev.slice(0, -1));
   }, []);
 
   const clearText = useCallback(() => {
     setFormedText("");
-    setLetterHistory([]);
+    setDigitHistory([]);
   }, []);
 
-  const stabilityProgress = currentLetter
+  const stabilityProgress = currentNumber
     ? Math.min((stableCountRef.current / STABLE_FRAMES) * 100, 100)
     : 0;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-      {/* Camera */}
       <div className="rounded-2xl border border-border bg-card overflow-hidden">
         <div className="relative aspect-[4/3] bg-muted">
           <video
@@ -485,26 +470,24 @@ function AlphabetDetect() {
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground font-mono">
-                  {isLoading ? "Loading AI model..." : "Start to detect alphabets"}
+                  {isLoading ? "Loading AI model..." : "Start to detect numbers"}
                 </p>
               </div>
             </div>
           )}
 
-          {/* Current detected letter overlay */}
-          {isRunning && currentLetter && (
+          {isRunning && currentNumber && (
             <div className="absolute top-3 right-3 z-10">
               <motion.div
-                key={currentLetter}
+                key={currentNumber}
                 initial={{ scale: 0.5, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 className="flex h-20 w-20 items-center justify-center rounded-2xl border-2 border-primary/50 bg-background/90 backdrop-blur-sm glow-primary"
               >
                 <span className="text-4xl font-bold font-display text-primary">
-                  {currentLetter}
+                  {currentNumber}
                 </span>
               </motion.div>
-              {/* Stability progress ring */}
               <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                 <motion.div
                   className="h-full rounded-full bg-accent"
@@ -518,7 +501,6 @@ function AlphabetDetect() {
             </div>
           )}
 
-          {/* Live indicator */}
           {isRunning && (
             <div className="absolute top-3 left-3 flex items-center gap-2 rounded-full bg-background/80 px-3 py-1 backdrop-blur-sm border border-border">
               <div className="h-2 w-2 rounded-full bg-accent animate-pulse" />
@@ -527,7 +509,6 @@ function AlphabetDetect() {
           )}
         </div>
 
-        {/* Controls */}
         <div className="flex items-center gap-3 border-t border-border p-4">
           {!isRunning ? (
             <Button onClick={handleStart} disabled={isLoading} className="flex-1 glow-primary">
@@ -546,7 +527,7 @@ function AlphabetDetect() {
           ) : (
             <Button onClick={handleStop} variant="destructive" className="flex-1">
               <Square className="mr-2 h-4 w-4" />
-              Stop
+              Stop Camera
             </Button>
           )}
           <Button
@@ -560,12 +541,11 @@ function AlphabetDetect() {
         </div>
       </div>
 
-      {/* Sidebar — formed text */}
+      {/* Sidebar */}
       <div className="flex flex-col gap-4">
-        {/* Formed text display */}
         <div className="rounded-2xl border border-border bg-card p-6">
           <h3 className="mb-3 text-xs font-mono uppercase tracking-wider text-muted-foreground">
-            Formed Text
+            Formed Number
           </h3>
           <div className="min-h-[80px] rounded-xl border border-border bg-secondary/50 p-4">
             {formedText ? (
@@ -575,7 +555,6 @@ function AlphabetDetect() {
                     key={`${char}-${i}`}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={char === " " ? "inline-block w-3" : ""}
                   >
                     {char}
                   </motion.span>
@@ -584,16 +563,12 @@ function AlphabetDetect() {
               </p>
             ) : (
               <p className="text-sm text-muted-foreground font-mono">
-                Sign letters to form words...
+                Sign numbers to form digits...
               </p>
             )}
           </div>
 
-          {/* Text controls */}
           <div className="mt-3 flex gap-2">
-            <Button variant="outline" size="sm" onClick={addSpace} className="flex-1 gap-1.5">
-              ␣ Space
-            </Button>
             <Button variant="outline" size="sm" onClick={deleteLastChar} className="flex-1 gap-1.5">
               ← Delete
             </Button>
@@ -603,22 +578,21 @@ function AlphabetDetect() {
           </div>
         </div>
 
-        {/* Current detection info */}
         <div className="rounded-2xl border border-border bg-card p-6">
           <h3 className="mb-3 text-xs font-mono uppercase tracking-wider text-muted-foreground">
             Detection
           </h3>
           <AnimatePresence mode="wait">
-            {currentLetter ? (
+            {currentNumber ? (
               <motion.div
-                key={currentLetter}
+                key={currentNumber}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 className="text-center"
               >
                 <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/40 bg-primary/10 glow-primary">
-                  <span className="text-3xl font-bold text-primary font-display">{currentLetter}</span>
+                  <span className="text-3xl font-bold text-primary font-display">{currentNumber}</span>
                 </div>
                 <div className="flex items-center justify-center gap-2 mt-2">
                   <span className="text-xs text-muted-foreground font-mono">Confidence</span>
@@ -640,29 +614,28 @@ function AlphabetDetect() {
                 animate={{ opacity: 1 }}
                 className="text-sm text-muted-foreground font-mono text-center"
               >
-                Show a letter sign...
+                Show a number sign...
               </motion.p>
             )}
           </AnimatePresence>
         </div>
 
-        {/* Letter history */}
         <div className="rounded-2xl border border-border bg-card p-4 flex-1">
           <h3 className="mb-3 text-xs font-mono uppercase tracking-wider text-muted-foreground">
-            Letter History
+            Digit History
           </h3>
           <div className="flex flex-wrap gap-1.5">
-            {letterHistory.length === 0 ? (
-              <p className="text-xs text-muted-foreground">No letters detected yet</p>
+            {digitHistory.length === 0 ? (
+              <p className="text-xs text-muted-foreground">No digits detected yet</p>
             ) : (
-              letterHistory.map((l, i) => (
+              digitHistory.map((d, i) => (
                 <motion.span
-                  key={`${l}-${i}`}
+                  key={`${d}-${i}`}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="rounded-md bg-secondary px-2 py-1 text-xs font-mono text-secondary-foreground"
                 >
-                  {l}
+                  {d}
                 </motion.span>
               ))
             )}
