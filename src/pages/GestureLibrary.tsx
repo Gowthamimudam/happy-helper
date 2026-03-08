@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, Sparkles, Mic, MicOff, Play } from "lucide-react";
-import { getAllGestures, deleteGesture, type StoredGesture } from "@/lib/gestureStore";
+import { Trash2, Sparkles, Mic, MicOff, Play, Pencil } from "lucide-react";
+import { getAllGestures, deleteGesture, saveGesture, type StoredGesture } from "@/lib/gestureStore";
 import { saveVoice, getVoice, deleteVoice } from "@/lib/voiceStore";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,8 +14,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+
+const EMOJI_OPTIONS = [
+  "👋", "✋", "🤚", "🖐️", "✌️", "🤞", "🤟", "🤘", "🤙", "👈", "👉", "👆", "👇", "☝️", "👍", "👎",
+  "✊", "👊", "🤛", "🤜", "👏", "🙌", "🤝", "🙏", "💪", "🖖", "🫰", "🫵", "🫱", "🫲",
+  "❤️", "⭐", "🔥", "💯", "✅", "❌", "⚡", "🎯", "🎉", "💡",
+];
 
 function VoiceRecordButton({ gestureName }: { gestureName: string }) {
   const [isRecording, setIsRecording] = useState(false);
