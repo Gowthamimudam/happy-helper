@@ -17,10 +17,14 @@ export function useHandDetection() {
   const streamRef = useRef<MediaStream | null>(null);
   const lastGestureTimeRef = useRef(0);
   const customGesturesRef = useRef<StoredGesture[]>([]);
+  const disabledGesturesRef = useRef<string[]>([]);
 
-  // Load custom gestures and refresh periodically
+  // Load custom gestures and disabled list, refresh periodically
   useEffect(() => {
-    const load = () => getAllGestures().then((g) => { customGesturesRef.current = g; });
+    const load = () => {
+      getAllGestures().then((g) => { customGesturesRef.current = g; });
+      disabledGesturesRef.current = getDisabledGestures();
+    };
     load();
     const interval = setInterval(load, 5000);
     return () => clearInterval(interval);
