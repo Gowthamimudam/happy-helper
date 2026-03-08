@@ -149,6 +149,11 @@ export default function GestureLibrary() {
   const [editEmoji, setEditEmoji] = useState("");
   const importInputRef = useRef<HTMLInputElement>(null);
 
+  const refreshLibrary = useCallback(async () => {
+    const all = await getAllGestures();
+    setCustomGestures(all.filter((g) => !g.name.startsWith("alpha_") && !g.name.startsWith("num_")));
+  }, []);
+
   const handleExport = useCallback(async () => {
     await exportGestures();
     toast.success("Gestures exported!");
@@ -166,11 +171,6 @@ export default function GestureLibrary() {
     }
     if (importInputRef.current) importInputRef.current.value = "";
   }, [refreshLibrary]);
-
-  const refreshLibrary = useCallback(async () => {
-    const all = await getAllGestures();
-    setCustomGestures(all.filter((g) => !g.name.startsWith("alpha_") && !g.name.startsWith("num_")));
-  }, []);
 
   useEffect(() => {
     void refreshLibrary();
