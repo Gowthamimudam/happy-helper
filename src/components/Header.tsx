@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Hand, Scan, BookOpen } from "lucide-react";
+import { Hand, Scan, BookOpen, GraduationCap } from "lucide-react";
 import { motion } from "framer-motion";
 
 const navItems = [
