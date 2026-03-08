@@ -234,10 +234,10 @@ export default function TrainPage() {
                 <div className="absolute top-0 left-0 right-0 bg-background/90 backdrop-blur-sm p-4 border-b border-primary/30 z-10">
                   <div className="text-center space-y-1">
                     <p className="text-lg font-bold font-display text-primary">
-                      Show your gesture
+                      {capturePhase === "right" ? "✋ Show RIGHT hand" : "🤚 Show LEFT hand"}
                     </p>
                     <p className="text-sm text-foreground font-mono">
-                      Hold your hand steady and click Capture Sample
+                      Hold your {capturePhase === "right" ? "right" : "left"} hand steady and click Capture
                     </p>
                   </div>
                 </div>
