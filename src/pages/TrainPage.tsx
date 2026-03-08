@@ -170,7 +170,7 @@ export default function TrainPage() {
                 <div className="absolute top-3 left-3 flex items-center gap-2 rounded-full bg-destructive/90 px-3 py-1 backdrop-blur-sm">
                   <div className="h-2 w-2 rounded-full bg-destructive-foreground animate-pulse" />
                   <span className="text-xs font-mono text-destructive-foreground">
-                    REC {samples.length}/30
+                    REC {samples.length}/5
                   </span>
                 </div>
               )}
