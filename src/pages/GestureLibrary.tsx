@@ -1,10 +1,21 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { motion } from "framer-motion";
-import { Trash2, Hand, Sparkles, Mic, MicOff, Play } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Trash2, Hand, Sparkles, Mic, MicOff, Play, RotateCcw } from "lucide-react";
 import { SUPPORTED_GESTURES } from "@/lib/gestureClassifier";
 import { getAllGestures, deleteGesture, type StoredGesture } from "@/lib/gestureStore";
 import { saveVoice, getVoice, deleteVoice } from "@/lib/voiceStore";
+import { getDisabledGestures, disableGesture, enableGesture } from "@/lib/disabledGestures";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 function VoiceRecordButton({ gestureName }: { gestureName: string }) {
@@ -94,16 +105,38 @@ function VoiceRecordButton({ gestureName }: { gestureName: string }) {
 
 export default function GestureLibrary() {
   const [customGestures, setCustomGestures] = useState<StoredGesture[]>([]);
+  const [disabledNames, setDisabledNames] = useState<string[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: "custom"; id: string; name: string } | { type: "builtin"; name: string } | null>(null);
 
   useEffect(() => {
     getAllGestures().then(setCustomGestures);
+    setDisabledNames(getDisabledGestures());
   }, []);
 
-  const handleDelete = async (id: string, name: string) => {
-    await deleteGesture(id);
-    await deleteVoice(name);
-    setCustomGestures(await getAllGestures());
-    toast.success(`"${name}" removed from library`);
+  const activeBuiltIn = SUPPORTED_GESTURES.filter((g) => !disabledNames.includes(g.name));
+  const disabledBuiltIn = SUPPORTED_GESTURES.filter((g) => disabledNames.includes(g.name));
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    if (deleteTarget.type === "custom") {
+      await deleteGesture(deleteTarget.id);
+      await deleteVoice(deleteTarget.name);
+      setCustomGestures(await getAllGestures());
+    } else {
+      disableGesture(deleteTarget.name);
+      await deleteVoice(deleteTarget.name);
+      setDisabledNames(getDisabledGestures());
+    }
+
+    toast.success("Gesture removed from library.");
+    setDeleteTarget(null);
+  };
+
+  const handleRestore = (name: string) => {
+    enableGesture(name);
+    setDisabledNames(getDisabledGestures());
+    toast.success(`"${name}" restored to library.`);
   };
 
   return (
@@ -130,58 +163,130 @@ export default function GestureLibrary() {
               Your Trained Gestures ({customGestures.length})
             </h2>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {customGestures.map((g, i) => (
+              <AnimatePresence>
+                {customGestures.map((g, i) => (
+                  <motion.div
+                    key={g.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="group relative rounded-xl border border-accent/30 bg-accent/5 p-4 transition-colors hover:border-accent/50"
+                  >
+                    <div className="mb-2 text-2xl">🤟</div>
+                    <h3 className="font-semibold text-foreground font-display">{g.name}</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {g.samples.length} samples • Custom trained
+                    </p>
+                    <div className="flex items-center gap-1 mt-2">
+                      <VoiceRecordButton gestureName={g.name} />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 ml-auto text-muted-foreground hover:text-destructive"
+                        onClick={() => setDeleteTarget({ type: "custom", id: g.id, name: g.name })}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </div>
+        )}
+
+        {/* Built-in gestures */}
+        <div className="mb-8">
+          <h2 className="mb-4 flex items-center gap-2 text-sm font-mono uppercase tracking-wider text-muted-foreground">
+            <Hand className="h-4 w-4" />
+            Built-in Gestures ({activeBuiltIn.length})
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <AnimatePresence>
+              {activeBuiltIn.map((g, i) => (
                 <motion.div
-                  key={g.id}
+                  key={g.name}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="group rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
+                >
+                  <div className="mb-2 text-2xl">{g.emoji}</div>
+                  <h3 className="font-semibold text-foreground font-display">{g.name}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">{g.description}</p>
+                  <div className="flex items-center gap-1 mt-2">
+                    <VoiceRecordButton gestureName={g.name} />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 w-7 p-0 ml-auto text-muted-foreground hover:text-destructive"
+                      onClick={() => setDeleteTarget({ type: "builtin", name: g.name })}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Disabled gestures */}
+        {disabledBuiltIn.length > 0 && (
+          <div>
+            <h2 className="mb-4 flex items-center gap-2 text-sm font-mono uppercase tracking-wider text-muted-foreground">
+              <RotateCcw className="h-4 w-4" />
+              Disabled Gestures ({disabledBuiltIn.length})
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {disabledBuiltIn.map((g, i) => (
+                <motion.div
+                  key={g.name}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="group relative rounded-xl border border-accent/30 bg-accent/5 p-4 transition-colors hover:border-accent/50"
+                  className="rounded-xl border border-dashed border-muted bg-muted/10 p-4 opacity-60"
                 >
-                  <div className="mb-2 text-2xl">🤟</div>
-                  <h3 className="font-semibold text-foreground font-display">{g.name}</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {g.samples.length} samples • Custom trained
-                  </p>
-                  <VoiceRecordButton gestureName={g.name} />
+                  <div className="mb-2 text-2xl grayscale">{g.emoji}</div>
+                  <h3 className="font-semibold text-muted-foreground font-display">{g.name}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">{g.description}</p>
                   <Button
-                    size="icon"
-                    variant="ghost"
-                    className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
-                    onClick={() => handleDelete(g.id, g.name)}
+                    size="sm"
+                    variant="outline"
+                    className="mt-2 h-7 px-2 gap-1 text-xs"
+                    onClick={() => handleRestore(g.name)}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <RotateCcw className="h-3 w-3" />
+                    Restore
                   </Button>
                 </motion.div>
               ))}
             </div>
           </div>
         )}
-
-        {/* Built-in gestures */}
-        <div>
-          <h2 className="mb-4 flex items-center gap-2 text-sm font-mono uppercase tracking-wider text-muted-foreground">
-            <Hand className="h-4 w-4" />
-            Built-in Gestures ({SUPPORTED_GESTURES.length})
-          </h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {SUPPORTED_GESTURES.map((g, i) => (
-              <motion.div
-                key={g.name}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="group rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
-              >
-                <div className="mb-2 text-2xl">{g.emoji}</div>
-                <h3 className="font-semibold text-foreground font-display">{g.name}</h3>
-                <p className="mt-1 text-xs text-muted-foreground">{g.description}</p>
-                <VoiceRecordButton gestureName={g.name} />
-              </motion.div>
-            ))}
-          </div>
-        </div>
       </motion.div>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this gesture?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget?.type === "builtin"
+                ? `"${deleteTarget.name}" will be disabled and moved to the Disabled Gestures list. You can restore it later.`
+                : `"${deleteTarget?.type === "custom" ? deleteTarget.name : ""}" and its samples will be permanently removed.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
