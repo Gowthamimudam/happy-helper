@@ -2,6 +2,7 @@ import { useCallback, useRef, useState, useEffect } from "react";
 import { FilesetResolver, HandLandmarker } from "@mediapipe/tasks-vision";
 import { classifyGesture, type GestureResult, type Landmark } from "@/lib/gestureClassifier";
 import { getAllGestures, matchCustomGesture, type StoredGesture } from "@/lib/gestureStore";
+import { getDisabledGestures } from "@/lib/disabledGestures";
 
 export function useHandDetection() {
   const [isLoading, setIsLoading] = useState(false);
