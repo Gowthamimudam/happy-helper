@@ -359,11 +359,12 @@ export default function TrainPage() {
                   ) : (
                     <Button
                       onClick={captureSample}
-                      className="bg-accent text-accent-foreground hover:bg-accent/90"
+                      size="lg"
+                      className="bg-accent text-accent-foreground hover:bg-accent/90 text-base px-6"
                     >
                       {DIRECTION_ICONS[currentDirection]}
                       <span className="ml-2">
-                        Capture {currentDirection}
+                        Capture Sample {captureStep + 1} ({currentDirection})
                       </span>
                     </Button>
                   )}
