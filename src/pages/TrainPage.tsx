@@ -71,6 +71,7 @@ export default function TrainPage() {
     setReadyToSave(false);
     setVoiceBlob(null);
     setDirectionWarning(null);
+    setGestureEmoji("");
   }, []);
 
   
