@@ -146,3 +146,34 @@ export function matchCustomGesture(
 
   return null;
 }
+
+/**
+ * Export all gestures as a JSON file download.
+ */
+export async function exportGestures(): Promise<void> {
+  const gestures = await getAllGestures();
+  const data = JSON.stringify(gestures, null, 2);
+  const blob = new Blob([data], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `signspeak-gestures-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Import gestures from a JSON file, merging with existing ones.
+ */
+export async function importGestures(file: File): Promise<number> {
+  const text = await file.text();
+  const gestures: StoredGesture[] = JSON.parse(text);
+  let count = 0;
+  for (const g of gestures) {
+    if (g.id && g.name && g.samples) {
+      await saveGesture(g);
+      count++;
+    }
+  }
+  return count;
+}
