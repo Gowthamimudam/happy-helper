@@ -424,7 +424,7 @@ export default function TrainPage() {
                     <div className="flex items-center gap-2 text-sm text-accent">
                       <CheckCircle2 className="h-4 w-4" />
                       <span className="font-medium">
-                        Gesture successfully trained with 4 directional samples!
+                        Gesture sample captured successfully!
                       </span>
                     </div>
 
