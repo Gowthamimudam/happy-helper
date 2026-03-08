@@ -102,6 +102,10 @@ function AlphabetTrain() {
 
   const handleStop = useCallback(() => {
     stop();
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+      videoRef.current.load();
+    }
     resetCapture();
   }, [stop]);
 
