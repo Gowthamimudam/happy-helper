@@ -2,6 +2,7 @@ import { useCallback, useRef, useState, useEffect } from "react";
 import { FilesetResolver, HandLandmarker } from "@mediapipe/tasks-vision";
 import { classifyGesture, type GestureResult, type Landmark } from "@/lib/gestureClassifier";
 import { getAllGestures, matchCustomGesture, type StoredGesture } from "@/lib/gestureStore";
+import { getDisabledGestures } from "@/lib/disabledGestures";
 
 export function useHandDetection() {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,10 +17,14 @@ export function useHandDetection() {
   const streamRef = useRef<MediaStream | null>(null);
   const lastGestureTimeRef = useRef(0);
   const customGesturesRef = useRef<StoredGesture[]>([]);
+  const disabledGesturesRef = useRef<string[]>([]);
 
-  // Load custom gestures and refresh periodically
+  // Load custom gestures and disabled list, refresh periodically
   useEffect(() => {
-    const load = () => getAllGestures().then((g) => { customGesturesRef.current = g; });
+    const load = () => {
+      getAllGestures().then((g) => { customGesturesRef.current = g; });
+      disabledGesturesRef.current = getDisabledGestures();
+    };
     load();
     const interval = setInterval(load, 5000);
     return () => clearInterval(interval);
@@ -89,7 +94,12 @@ export function useHandDetection() {
           setGesture({ gesture: customMatch.name, confidence: customMatch.confidence });
         } else {
           const result = classifyGesture(lm, handedness);
-          setGesture(result);
+          // Skip disabled built-in gestures
+          if (disabledGesturesRef.current.includes(result.gesture)) {
+            setGesture(null);
+          } else {
+            setGesture(result);
+          }
         }
         lastGestureTimeRef.current = now;
       }
