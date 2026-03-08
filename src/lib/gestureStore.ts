@@ -5,7 +5,7 @@
 
 import type { Landmark } from "./gestureClassifier";
 
-export type HandType = "left" | "right";
+export type HandType = "left" | "right" | "both";
 
 export interface StoredGesture {
   id: string;
