@@ -411,6 +411,18 @@ export default function GestureLibrary() {
         )}
       </motion.div>
 
+      <div className="fixed bottom-4 right-4 z-40">
+        <Button
+          onClick={() => importInputRef.current?.click()}
+          size="lg"
+          className="rounded-full px-6 h-12 gap-2 shadow-lg"
+          aria-label="Import gestures backup"
+        >
+          <FileUp className="h-5 w-5" />
+          Import Gestures
+        </Button>
+      </div>
+
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
