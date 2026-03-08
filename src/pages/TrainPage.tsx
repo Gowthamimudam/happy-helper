@@ -261,8 +261,8 @@ export default function TrainPage() {
                 <li>Start the camera</li>
                 <li>Type a gesture name (e.g. "Water")</li>
                 <li>Hold the gesture and press Record</li>
-                <li>Keep the pose steady for ~6 seconds</li>
-                <li>Save when 30 samples are captured</li>
+                <li>Keep the pose steady for ~1 second</li>
+                <li>Save when 5 samples are captured</li>
                 <li>Go to Detect page — your gesture works!</li>
               </ol>
             </div>
