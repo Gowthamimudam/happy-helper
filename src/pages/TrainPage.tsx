@@ -235,33 +235,16 @@ export default function TrainPage() {
                 </div>
               )}
 
-              {/* Large step instruction overlay during capture */}
+              {/* Capture instruction overlay */}
               {isCapturing && (
                 <div className="absolute top-0 left-0 right-0 bg-background/90 backdrop-blur-sm p-4 border-b border-primary/30 z-10">
                   <div className="text-center space-y-1">
                     <p className="text-lg font-bold font-display text-primary">
-                      Sample {captureStep + 1} of {REQUIRED_SAMPLES}
+                      Show your gesture
                     </p>
                     <p className="text-sm text-foreground font-mono">
-                      {DIRECTION_INSTRUCTIONS[currentDirection]}
+                      Hold your hand steady and click Capture Sample
                     </p>
-                    <div className="inline-flex items-center gap-2 rounded-full bg-primary/20 px-4 py-1.5 mt-1">
-                      {DIRECTION_ICONS[currentDirection]}
-                      <span className="text-sm font-bold font-mono text-primary">
-                        Expected Direction: {currentDirection}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Success overlay after each capture */}
-              {isCapturing && captureStep > 0 && (
-                <div className="absolute bottom-3 left-3 right-3 z-10">
-                  <div className="rounded-lg bg-accent/90 backdrop-blur-sm px-3 py-2 text-center">
-                    <span className="text-xs font-mono text-accent-foreground">
-                      ✓ Sample {captureStep} recorded successfully — now show {currentDirection}
-                    </span>
                   </div>
                 </div>
               )}
