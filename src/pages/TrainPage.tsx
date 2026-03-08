@@ -131,7 +131,7 @@ export default function TrainPage() {
       setIsCapturing(false);
       setReadyToSave(true);
       toast.success(
-        "Gesture successfully trained with 4 directional samples!"
+        "Gesture sample captured successfully!"
       );
     } else {
       toast.success(
