@@ -10,16 +10,10 @@ import {
   CheckCircle2,
   Mic,
   MicOff,
-  Compass,
   AlertTriangle,
-  ArrowUp,
-  ArrowLeft,
-  ArrowDown,
-  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import HandCanvas from "@/components/HandCanvas";
 import { useHandDetection } from "@/hooks/useHandDetection";
 import {
@@ -30,24 +24,11 @@ import {
 } from "@/lib/gestureStore";
 import { saveVoice } from "@/lib/voiceStore";
 import type { Landmark } from "@/lib/gestureClassifier";
-import {
-  DIRECTIONS_ORDER,
-  DIRECTION_INSTRUCTIONS,
-  detectPalmDirection,
-  type Direction,
-} from "@/lib/palmOrientation";
 import { toast } from "sonner";
 
 const VIDEO_WIDTH = 640;
 const VIDEO_HEIGHT = 480;
 const REQUIRED_SAMPLES = 1;
-
-const DIRECTION_ICONS: Record<Direction, React.ReactNode> = {
-  NORTH: <ArrowUp className="h-5 w-5" />,
-  WEST: <ArrowLeft className="h-5 w-5" />,
-  SOUTH: <ArrowDown className="h-5 w-5" />,
-  EAST: <ArrowRight className="h-5 w-5" />,
-};
 
 export default function TrainPage() {
   const navigate = useNavigate();
