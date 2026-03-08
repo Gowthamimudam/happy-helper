@@ -144,6 +144,7 @@ export default function TrainPage() {
       id: `custom_${Date.now()}`,
       name: gestureName.trim(),
       emoji: gestureEmoji.trim() || "👋",
+      hand: gestureHand,
       samples,
       createdAt: Date.now(),
     };
