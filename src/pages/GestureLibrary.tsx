@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, Sparkles, Mic, MicOff, Play, Pencil } from "lucide-react";
+import { Trash2, Sparkles, Mic, MicOff, Play, Pencil, Upload } from "lucide-react";
 import { getAllGestures, deleteGesture, saveGesture, type StoredGesture } from "@/lib/gestureStore";
 import { saveVoice, getVoice, deleteVoice } from "@/lib/voiceStore";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,7 @@ function VoiceRecordButton({ gestureName }: { gestureName: string }) {
   const [hasVoice, setHasVoice] = useState(false);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     getVoice(gestureName).then((v) => setHasVoice(!!v));
@@ -77,6 +78,19 @@ function VoiceRecordButton({ gestureName }: { gestureName: string }) {
     }
   }, [gestureName]);
 
+  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("audio/")) {
+      toast.error("Please upload an audio file");
+      return;
+    }
+    await saveVoice(gestureName, file);
+    setHasVoice(true);
+    toast.success(`Voice uploaded for "${gestureName}"`);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, [gestureName]);
+
   return (
     <div className="flex items-center gap-1 mt-2">
       {!isRecording ? (
@@ -109,6 +123,26 @@ function VoiceRecordButton({ gestureName }: { gestureName: string }) {
         >
           <Play className="h-3 w-3" />
         </Button>
+      )}
+      {!isRecording && (
+        <>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="audio/*"
+            className="hidden"
+            onChange={handleFileUpload}
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            className="h-7 px-2 gap-1 text-xs"
+          >
+            <Upload className="h-3 w-3" />
+            Upload
+          </Button>
+        </>
       )}
     </div>
   );
