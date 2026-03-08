@@ -29,7 +29,7 @@ import { toast } from "sonner";
 
 const VIDEO_WIDTH = 640;
 const VIDEO_HEIGHT = 480;
-const REQUIRED_SAMPLES = 1;
+const REQUIRED_SAMPLES = 2; // one per hand
 
 export default function TrainPage() {
   const navigate = useNavigate();
