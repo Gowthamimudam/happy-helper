@@ -111,35 +111,14 @@ export default function TrainPage() {
     }
 
     const lm = landmarks[0];
-    const detected = detectPalmDirection(lm);
-    const expected = DIRECTIONS_ORDER[captureStep];
-
-    if (detected !== expected) {
-      setDirectionWarning(
-        `Wrong direction detected. Please rotate your hand toward ${expected}.`
-      );
-      return;
-    }
-
     setDirectionWarning(null);
     const newSamples = [...samples, [...lm]];
     setSamples(newSamples);
-    const nextStep = newSamples.length;
-    setCaptureStep(nextStep);
-
-    if (nextStep >= REQUIRED_SAMPLES) {
-      setIsCapturing(false);
-      setReadyToSave(true);
-      toast.success(
-        "Gesture sample captured successfully!"
-      );
-    } else {
-      toast.success(
-        `Sample ${nextStep}/${REQUIRED_SAMPLES} (${expected}) captured!`
-      );
-      toast.info(DIRECTION_INSTRUCTIONS[DIRECTIONS_ORDER[nextStep]]);
-    }
-  }, [landmarks, captureStep, samples]);
+    setCaptureStep(1);
+    setIsCapturing(false);
+    setReadyToSave(true);
+    toast.success("Gesture sample captured successfully!");
+  }, [landmarks, samples]);
 
   // Voice recording
   const startVoiceRecording = useCallback(async () => {
