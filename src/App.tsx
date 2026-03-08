@@ -23,6 +23,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/detect" element={<DetectionPage />} />
           <Route path="/gestures" element={<GestureLibrary />} />
+          <Route path="/train" element={<TrainPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

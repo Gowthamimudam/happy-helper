@@ -83,8 +83,14 @@ export function useHandDetection() {
 
       // Throttle gesture updates to avoid flicker
       if (now - lastGestureTimeRef.current > 300) {
-        const result = classifyGesture(lm, handedness);
-        setGesture(result);
+        // Check custom gestures first (higher priority)
+        const customMatch = matchCustomGesture(lm, customGesturesRef.current);
+        if (customMatch && customMatch.confidence > 0.5) {
+          setGesture({ gesture: customMatch.name, confidence: customMatch.confidence });
+        } else {
+          const result = classifyGesture(lm, handedness);
+          setGesture(result);
+        }
         lastGestureTimeRef.current = now;
       }
     } else {

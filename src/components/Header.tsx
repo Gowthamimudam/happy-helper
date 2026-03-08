@@ -6,6 +6,7 @@ const navItems = [
   { path: "/", label: "Home", icon: Hand },
   { path: "/detect", label: "Detect", icon: Scan },
   { path: "/gestures", label: "Gestures", icon: BookOpen },
+  { path: "/train", label: "Train", icon: GraduationCap },
 ];
 
 export default function Header() {
