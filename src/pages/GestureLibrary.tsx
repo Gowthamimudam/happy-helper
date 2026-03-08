@@ -137,35 +137,8 @@ function VoiceRecordButton({ gestureName }: { gestureName: string }) {
   );
 }
 
-function EmojiPicker({ currentEmoji, onSelect }: { currentEmoji: string; onSelect: (emoji: string) => void }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button className="group/emoji relative text-2xl mb-2 cursor-pointer hover:scale-110 transition-transform" title="Click to change emoji">
-          {currentEmoji || "👋"}
-          <span className="absolute -bottom-1 -right-1 bg-accent/80 rounded-full p-0.5 ring-1 ring-accent">
-            <Pencil className="h-2.5 w-2.5 text-accent-foreground" />
-          </span>
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-64 p-2" align="start">
-        <p className="text-xs text-muted-foreground mb-2 font-mono">Choose emoji</p>
-        <div className="grid grid-cols-8 gap-1">
-          {EMOJI_OPTIONS.map((emoji) => (
-            <button
-              key={emoji}
-              onClick={() => { onSelect(emoji); setOpen(false); }}
-              className={`text-lg p-1 rounded hover:bg-accent/20 transition-colors ${emoji === currentEmoji ? "bg-accent/30 ring-1 ring-accent" : ""}`}
-            >
-              {emoji}
-            </button>
-          ))}
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-}
+
+
 
 export default function GestureLibrary() {
   const navigate = useNavigate();
