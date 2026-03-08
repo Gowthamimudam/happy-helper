@@ -119,7 +119,7 @@ function AlphabetTrain() {
     if (!selectedLetter) return;
     resetCapture();
     setCapturePhase("right");
-    toast.info(`Show the sign for "${selectedLetter}" with your RIGHT hand.`);
+    toast.info(`Show the sign for "${selectedLetter}" and click Capture.`);
   }, [selectedLetter, resetCapture]);
 
   const captureSample = useCallback(() => {
@@ -128,25 +128,18 @@ function AlphabetTrain() {
       return;
     }
     const lm = landmarks[0];
-    const newSamples = [...samples, [...lm]];
-    setSamples(newSamples);
-
-    if (capturePhase === "right") {
-      setCapturePhase("left");
-      toast.success(`✋ Right hand captured for "${selectedLetter}"! Now show LEFT hand.`);
-    } else if (capturePhase === "left") {
-      setCapturePhase("done");
-      toast.success(`🤚 Left hand captured! Ready to save "${selectedLetter}".`);
-    }
-  }, [landmarks, samples, capturePhase, selectedLetter]);
+    setSamples([[...lm]]);
+    setCapturePhase("done");
+    toast.success(`✋ Hand captured for "${selectedLetter}"! Ready to save.`);
+  }, [landmarks, selectedLetter]);
 
   const handleSave = useCallback(async () => {
-    if (!selectedLetter || samples.length < 2) return;
+    if (!selectedLetter || samples.length < 1) return;
     const gesture: StoredGesture = {
       id: `alpha_${selectedLetter}_${Date.now()}`,
       name: `alpha_${selectedLetter}`,
       emoji: selectedLetter,
-      hand: "both" as HandType,
+      hand: "right" as HandType,
       samples,
       createdAt: Date.now(),
     };
