@@ -172,7 +172,7 @@ export default function TrainPage() {
   const handleSave = useCallback(async () => {
     if (samples.length < REQUIRED_SAMPLES) {
       toast.error(
-        "Training incomplete. Please record all 4 directional samples."
+        "Training incomplete. Please capture the gesture sample."
       );
       return;
     }
