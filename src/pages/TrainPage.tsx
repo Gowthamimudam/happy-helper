@@ -40,7 +40,7 @@ import { toast } from "sonner";
 
 const VIDEO_WIDTH = 640;
 const VIDEO_HEIGHT = 480;
-const REQUIRED_SAMPLES = 4;
+const REQUIRED_SAMPLES = 1;
 
 const DIRECTION_ICONS: Record<Direction, React.ReactNode> = {
   NORTH: <ArrowUp className="h-5 w-5" />,
