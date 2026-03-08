@@ -19,16 +19,27 @@ export function useHandDetection() {
   const customGesturesRef = useRef<StoredGesture[]>([]);
   const disabledGesturesRef = useRef<string[]>([]);
 
-  // Load custom gestures and disabled list, refresh periodically
-  useEffect(() => {
-    const load = () => {
-      getAllGestures().then((g) => { customGesturesRef.current = g; });
-      disabledGesturesRef.current = getDisabledGestures();
-    };
-    load();
-    const interval = setInterval(load, 5000);
-    return () => clearInterval(interval);
+  const refreshGestureData = useCallback(async () => {
+    try {
+      const [customGestures, disabledGestures] = await Promise.all([
+        getAllGestures(),
+        getDisabledGestures(),
+      ]);
+      customGesturesRef.current = customGestures;
+      disabledGesturesRef.current = disabledGestures;
+    } catch (e) {
+      console.error("Failed to refresh gesture data:", e);
+    }
   }, []);
+
+  // Load custom gestures and deleted built-ins, refresh periodically
+  useEffect(() => {
+    void refreshGestureData();
+    const interval = setInterval(() => {
+      void refreshGestureData();
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [refreshGestureData]);
 
   const initialize = useCallback(async () => {
     if (handLandmarkerRef.current) return;
@@ -94,7 +105,7 @@ export function useHandDetection() {
           setGesture({ gesture: customMatch.name, confidence: customMatch.confidence });
         } else {
           const result = classifyGesture(lm, handedness);
-          // Skip disabled built-in gestures
+          // Skip deleted built-in gestures
           if (disabledGesturesRef.current.includes(result.gesture)) {
             setGesture(null);
           } else {
@@ -116,9 +127,10 @@ export function useHandDetection() {
   const start = useCallback(async (video: HTMLVideoElement) => {
     await initialize();
     await startCamera(video);
+    await refreshGestureData();
     setIsRunning(true);
     animationFrameRef.current = requestAnimationFrame(detectFrame);
-  }, [initialize, startCamera, detectFrame]);
+  }, [initialize, startCamera, refreshGestureData, detectFrame]);
 
   const stop = useCallback(() => {
     cancelAnimationFrame(animationFrameRef.current);
