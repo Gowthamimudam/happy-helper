@@ -1,8 +1,7 @@
 import { useCallback, useRef, useState, useEffect } from "react";
 import { FilesetResolver, HandLandmarker } from "@mediapipe/tasks-vision";
-import { classifyGesture, type GestureResult, type Landmark } from "@/lib/gestureClassifier";
+import { type GestureResult, type Landmark } from "@/lib/gestureClassifier";
 import { getAllGestures, matchCustomGesture, type StoredGesture } from "@/lib/gestureStore";
-import { getDisabledGestures } from "@/lib/disabledGestures";
 
 export function useHandDetection() {
   const [isLoading, setIsLoading] = useState(false);
@@ -17,27 +16,18 @@ export function useHandDetection() {
   const streamRef = useRef<MediaStream | null>(null);
   const lastGestureTimeRef = useRef(0);
   const customGesturesRef = useRef<StoredGesture[]>([]);
-  const disabledGesturesRef = useRef<string[]>([]);
 
   const refreshGestureData = useCallback(async () => {
     try {
-      const [customGestures, disabledGestures] = await Promise.all([
-        getAllGestures(),
-        getDisabledGestures(),
-      ]);
-      customGesturesRef.current = customGestures;
-      disabledGesturesRef.current = disabledGestures;
+      customGesturesRef.current = await getAllGestures();
     } catch (e) {
       console.error("Failed to refresh gesture data:", e);
     }
   }, []);
 
-  // Load custom gestures and deleted built-ins, refresh periodically
   useEffect(() => {
     void refreshGestureData();
-    const interval = setInterval(() => {
-      void refreshGestureData();
-    }, 3000);
+    const interval = setInterval(() => void refreshGestureData(), 3000);
     return () => clearInterval(interval);
   }, [refreshGestureData]);
 
@@ -94,23 +84,14 @@ export function useHandDetection() {
 
     if (results.landmarks && results.landmarks.length > 0) {
       const lm = results.landmarks[0] as Landmark[];
-      const handedness = results.handednesses?.[0]?.[0]?.categoryName ?? "Right";
       setLandmarks(results.landmarks as Landmark[][]);
 
-      // Throttle gesture updates — fast response
       if (now - lastGestureTimeRef.current > 100) {
-        // Check custom gestures first (higher priority)
         const customMatch = matchCustomGesture(lm, customGesturesRef.current);
         if (customMatch && customMatch.confidence > 0.3) {
           setGesture({ gesture: customMatch.name, confidence: customMatch.confidence });
         } else {
-          const result = classifyGesture(lm, handedness);
-          // Skip deleted built-in gestures
-          if (disabledGesturesRef.current.includes(result.gesture)) {
-            setGesture(null);
-          } else {
-            setGesture(result);
-          }
+          setGesture(null);
         }
         lastGestureTimeRef.current = now;
       }

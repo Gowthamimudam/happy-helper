@@ -1,10 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, Hand, Sparkles, Mic, MicOff, Play } from "lucide-react";
-import { SUPPORTED_GESTURES } from "@/lib/gestureClassifier";
+import { Trash2, Sparkles, Mic, MicOff, Play } from "lucide-react";
 import { getAllGestures, deleteGesture, type StoredGesture } from "@/lib/gestureStore";
 import { saveVoice, getVoice, deleteVoice } from "@/lib/voiceStore";
-import { getDisabledGestures, disableGesture, disableGestures } from "@/lib/disabledGestures";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -17,11 +15,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-
-type DeleteTarget =
-  | { type: "custom"; id: string; name: string }
-  | { type: "builtin"; name: string }
-  | { type: "all_builtin" };
+import { useNavigate } from "react-router-dom";
 
 function VoiceRecordButton({ gestureName }: { gestureName: string }) {
   const [isRecording, setIsRecording] = useState(false);
@@ -109,39 +103,22 @@ function VoiceRecordButton({ gestureName }: { gestureName: string }) {
 }
 
 export default function GestureLibrary() {
+  const navigate = useNavigate();
   const [customGestures, setCustomGestures] = useState<StoredGesture[]>([]);
-  const [deletedBuiltInNames, setDeletedBuiltInNames] = useState<string[]>([]);
-  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   const refreshLibrary = useCallback(async () => {
-    const [custom, deletedBuiltIns] = await Promise.all([
-      getAllGestures(),
-      getDisabledGestures(),
-    ]);
-    setCustomGestures(custom);
-    setDeletedBuiltInNames(deletedBuiltIns);
+    setCustomGestures(await getAllGestures());
   }, []);
 
   useEffect(() => {
     void refreshLibrary();
   }, [refreshLibrary]);
 
-  const activeBuiltIn = SUPPORTED_GESTURES.filter((g) => !deletedBuiltInNames.includes(g.name));
-
   const confirmDelete = useCallback(async () => {
     if (!deleteTarget) return;
-
-    if (deleteTarget.type === "custom") {
-      await deleteGesture(deleteTarget.id);
-      await deleteVoice(deleteTarget.name);
-    } else if (deleteTarget.type === "builtin") {
-      await disableGesture(deleteTarget.name);
-      await deleteVoice(deleteTarget.name);
-    } else {
-      await disableGestures(SUPPORTED_GESTURES.map((g) => g.name));
-      await Promise.all(SUPPORTED_GESTURES.map((g) => deleteVoice(g.name)));
-    }
-
+    await deleteGesture(deleteTarget.id);
+    await deleteVoice(deleteTarget.name);
     await refreshLibrary();
     toast.success("Gesture removed from library.");
     setDeleteTarget(null);
@@ -159,15 +136,26 @@ export default function GestureLibrary() {
             Gesture <span className="text-gradient">Library</span>
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            All active gestures — custom and built-in. Deleted gestures stay deleted permanently.
+            Your trained gestures. Train new gestures from the Training page.
           </p>
         </div>
 
-        {customGestures.length > 0 && (
-          <div className="mb-8">
+        {customGestures.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border bg-card p-8 text-center">
+            <Sparkles className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
+            <p className="text-muted-foreground font-medium">No gestures yet</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Go to the Training page to teach your first gesture.
+            </p>
+            <Button className="mt-4" onClick={() => navigate("/train")}>
+              Train a Gesture
+            </Button>
+          </div>
+        ) : (
+          <div>
             <h2 className="mb-4 flex items-center gap-2 text-sm font-mono uppercase tracking-wider text-muted-foreground">
               <Sparkles className="h-4 w-4 text-accent" />
-              Your Trained Gestures ({customGestures.length})
+              Your Gestures ({customGestures.length})
             </h2>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <AnimatePresence>
@@ -180,10 +168,10 @@ export default function GestureLibrary() {
                     transition={{ delay: i * 0.05 }}
                     className="group relative rounded-xl border border-accent/30 bg-accent/5 p-4 transition-colors hover:border-accent/50"
                   >
-                    <div className="mb-2 text-2xl">{g.emoji || "🤟"}</div>
+                    <div className="mb-2 text-2xl">{g.emoji || "👋"}</div>
                     <h3 className="font-semibold text-foreground font-display">{g.name}</h3>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {g.samples.length} samples • Custom trained
+                      {g.samples.length} sample{g.samples.length !== 1 ? "s" : ""} • Custom trained
                     </p>
                     <div className="flex items-center gap-1 mt-2">
                       <VoiceRecordButton gestureName={g.name} />
@@ -191,7 +179,7 @@ export default function GestureLibrary() {
                         size="sm"
                         variant="ghost"
                         className="h-7 w-7 p-0 ml-auto text-muted-foreground hover:text-destructive"
-                        onClick={() => setDeleteTarget({ type: "custom", id: g.id, name: g.name })}
+                        onClick={() => setDeleteTarget({ id: g.id, name: g.name })}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -202,61 +190,6 @@ export default function GestureLibrary() {
             </div>
           </div>
         )}
-
-        <div className="mb-8">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="flex items-center gap-2 text-sm font-mono uppercase tracking-wider text-muted-foreground">
-              <Hand className="h-4 w-4" />
-              Built-in Gestures ({activeBuiltIn.length})
-            </h2>
-            {activeBuiltIn.length > 0 && (
-              <Button
-                size="sm"
-                variant="destructive"
-                className="h-7 px-2 text-xs"
-                onClick={() => setDeleteTarget({ type: "all_builtin" })}
-              >
-                Delete All Built-ins
-              </Button>
-            )}
-          </div>
-
-          {activeBuiltIn.length === 0 ? (
-            <div className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
-              All built-in gestures are deleted from this library.
-            </div>
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <AnimatePresence>
-                {activeBuiltIn.map((g, i) => (
-                  <motion.div
-                    key={g.name}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="group rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
-                  >
-                    <div className="mb-2 text-2xl">{g.emoji}</div>
-                    <h3 className="font-semibold text-foreground font-display">{g.name}</h3>
-                    <p className="mt-1 text-xs text-muted-foreground">{g.description}</p>
-                    <div className="flex items-center gap-1 mt-2">
-                      <VoiceRecordButton gestureName={g.name} />
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 w-7 p-0 ml-auto text-muted-foreground hover:text-destructive"
-                        onClick={() => setDeleteTarget({ type: "builtin", name: g.name })}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          )}
-        </div>
       </motion.div>
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
@@ -264,11 +197,7 @@ export default function GestureLibrary() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure you want to delete this gesture?</AlertDialogTitle>
             <AlertDialogDescription>
-              {deleteTarget?.type === "all_builtin"
-                ? "All built-in gestures will be permanently removed from the library and detection."
-                : deleteTarget?.type === "builtin"
-                  ? `"${deleteTarget.name}" will be permanently removed from the library and detection.`
-                  : `"${deleteTarget?.type === "custom" ? deleteTarget.name : ""}" and its samples will be permanently removed.`}
+              "{deleteTarget?.name}" and its samples will be permanently removed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
