@@ -155,11 +155,6 @@ export default function GestureLibrary() {
     void refreshLibrary();
   }, [refreshLibrary]);
 
-  const handleEmojiChange = useCallback(async (gesture: StoredGesture, newEmoji: string) => {
-    await saveGesture({ ...gesture, emoji: newEmoji });
-    await refreshLibrary();
-    toast.success(`Emoji updated for "${gesture.name}"`);
-  }, [refreshLibrary]);
 
   const confirmDelete = useCallback(async () => {
     if (!deleteTarget) return;
