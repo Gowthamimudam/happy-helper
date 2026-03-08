@@ -1,6 +1,7 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import { FilesetResolver, HandLandmarker } from "@mediapipe/tasks-vision";
 import { classifyGesture, type GestureResult, type Landmark } from "@/lib/gestureClassifier";
+import { getAllGestures, matchCustomGesture, type StoredGesture } from "@/lib/gestureStore";
 
 export function useHandDetection() {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,6 +15,15 @@ export function useHandDetection() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const lastGestureTimeRef = useRef(0);
+  const customGesturesRef = useRef<StoredGesture[]>([]);
+
+  // Load custom gestures and refresh periodically
+  useEffect(() => {
+    const load = () => getAllGestures().then((g) => { customGesturesRef.current = g; });
+    load();
+    const interval = setInterval(load, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const initialize = useCallback(async () => {
     if (handLandmarkerRef.current) return;
@@ -73,8 +83,14 @@ export function useHandDetection() {
 
       // Throttle gesture updates to avoid flicker
       if (now - lastGestureTimeRef.current > 300) {
-        const result = classifyGesture(lm, handedness);
-        setGesture(result);
+        // Check custom gestures first (higher priority)
+        const customMatch = matchCustomGesture(lm, customGesturesRef.current);
+        if (customMatch && customMatch.confidence > 0.5) {
+          setGesture({ gesture: customMatch.name, confidence: customMatch.confidence });
+        } else {
+          const result = classifyGesture(lm, handedness);
+          setGesture(result);
+        }
         lastGestureTimeRef.current = now;
       }
     } else {

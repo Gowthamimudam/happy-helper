@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import Index from "./pages/Index";
 import DetectionPage from "./pages/DetectionPage";
 import GestureLibrary from "./pages/GestureLibrary";
+import TrainPage from "./pages/TrainPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/detect" element={<DetectionPage />} />
           <Route path="/gestures" element={<GestureLibrary />} />
+          <Route path="/train" element={<TrainPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -1,11 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Hand, Scan, BookOpen } from "lucide-react";
+import { Hand, Scan, BookOpen, GraduationCap } from "lucide-react";
 import { motion } from "framer-motion";
 
 const navItems = [
   { path: "/", label: "Home", icon: Hand },
   { path: "/detect", label: "Detect", icon: Scan },
   { path: "/gestures", label: "Gestures", icon: BookOpen },
+  { path: "/train", label: "Train", icon: GraduationCap },
 ];
 
 export default function Header() {
