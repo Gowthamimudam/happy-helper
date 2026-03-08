@@ -101,7 +101,7 @@ export default function TrainPage() {
     resetCapture();
     setIsCapturing(true);
     setCaptureStep(0);
-    toast.info(DIRECTION_INSTRUCTIONS["NORTH"]);
+    toast.info("Show your gesture to the camera and click Capture Sample.");
   }, [gestureName, resetCapture]);
 
   const captureSample = useCallback(() => {
