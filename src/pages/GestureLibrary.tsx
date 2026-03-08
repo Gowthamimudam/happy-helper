@@ -124,6 +124,26 @@ function VoiceRecordButton({ gestureName }: { gestureName: string }) {
           <Play className="h-3 w-3" />
         </Button>
       )}
+      {!isRecording && (
+        <>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="audio/*"
+            className="hidden"
+            onChange={handleFileUpload}
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            className="h-7 px-2 gap-1 text-xs"
+          >
+            <Upload className="h-3 w-3" />
+            Upload
+          </Button>
+        </>
+      )}
     </div>
   );
 }
