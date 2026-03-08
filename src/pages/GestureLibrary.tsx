@@ -252,9 +252,26 @@ export default function GestureLibrary() {
             <p className="mt-2 text-sm text-muted-foreground">
               Go to the Training page to teach your first gesture.
             </p>
-            <Button className="mt-6 rounded-xl px-8" onClick={() => navigate("/train")}>
-              Train a Gesture
-            </Button>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Button className="rounded-xl px-8" onClick={() => navigate("/train")}>
+                Train a Gesture
+              </Button>
+              <input
+                ref={importInputRef}
+                type="file"
+                accept=".json"
+                className="hidden"
+                onChange={handleImport}
+              />
+              <Button
+                variant="outline"
+                className="rounded-xl px-8 gap-2"
+                onClick={() => importInputRef.current?.click()}
+              >
+                <FileUp className="h-4 w-4" />
+                Import Gestures
+              </Button>
+            </div>
           </div>
         ) : (
           <div>
