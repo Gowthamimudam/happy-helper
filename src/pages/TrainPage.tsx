@@ -141,6 +141,7 @@ export default function TrainPage() {
     const gesture: StoredGesture = {
       id: `custom_${Date.now()}`,
       name: gestureName.trim(),
+      emoji: gestureEmoji.trim() || "👋",
       samples,
       createdAt: Date.now(),
     };
