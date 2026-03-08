@@ -324,10 +324,8 @@ export default function TrainPage() {
                       size="lg"
                       className="bg-accent text-accent-foreground hover:bg-accent/90 text-base px-6"
                     >
-                      {DIRECTION_ICONS[currentDirection]}
-                      <span className="ml-2">
-                        Capture Sample {captureStep + 1} ({currentDirection})
-                      </span>
+                      <Camera className="mr-2 h-4 w-4" />
+                      Capture Sample
                     </Button>
                   )}
                 </div>
