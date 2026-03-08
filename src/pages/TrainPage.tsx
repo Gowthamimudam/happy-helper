@@ -29,7 +29,7 @@ import { toast } from "sonner";
 
 const VIDEO_WIDTH = 640;
 const VIDEO_HEIGHT = 480;
-const REQUIRED_SAMPLES = 1;
+const REQUIRED_SAMPLES = 2; // one per hand
 
 export default function TrainPage() {
   const navigate = useNavigate();
@@ -39,9 +39,8 @@ export default function TrainPage() {
 
   const [gestureName, setGestureName] = useState("");
   const [gestureEmoji, setGestureEmoji] = useState("");
-  const [gestureHand, setGestureHand] = useState<HandType>("right");
   const [samples, setSamples] = useState<Landmark[][]>([]);
-  const [captureStep, setCaptureStep] = useState(0);
+  const [capturePhase, setCapturePhase] = useState<"idle" | "right" | "left" | "done">("idle");
   const [isCapturing, setIsCapturing] = useState(false);
   const [directionWarning, setDirectionWarning] = useState<string | null>(null);
   const [savedGestures, setSavedGestures] = useState<StoredGesture[]>([]);
@@ -68,7 +67,7 @@ export default function TrainPage() {
 
   const resetCapture = useCallback(() => {
     setIsCapturing(false);
-    setCaptureStep(0);
+    setCapturePhase("idle");
     setSamples([]);
     setReadyToSave(false);
     setVoiceBlob(null);
@@ -85,8 +84,8 @@ export default function TrainPage() {
     }
     resetCapture();
     setIsCapturing(true);
-    setCaptureStep(0);
-    toast.info("Show your gesture to the camera and click Capture Sample.");
+    setCapturePhase("right");
+    toast.info("Show your RIGHT hand gesture to the camera and click Capture.");
   }, [gestureName, resetCapture]);
 
   const captureSample = useCallback(() => {
@@ -99,11 +98,19 @@ export default function TrainPage() {
     setDirectionWarning(null);
     const newSamples = [...samples, [...lm]];
     setSamples(newSamples);
-    setCaptureStep(1);
-    setIsCapturing(false);
-    setReadyToSave(true);
-    toast.success("Gesture sample captured successfully!");
-  }, [landmarks, samples]);
+
+    if (capturePhase === "right") {
+      // Right hand captured, now ask for left
+      setCapturePhase("left");
+      toast.success("✋ Right hand captured! Now show your LEFT hand gesture.");
+    } else if (capturePhase === "left") {
+      // Both hands captured
+      setCapturePhase("done");
+      setIsCapturing(false);
+      setReadyToSave(true);
+      toast.success("🤚 Left hand captured! Both hands recorded. Ready to save!");
+    }
+  }, [landmarks, samples, capturePhase]);
 
   // Voice recording
   const startVoiceRecording = useCallback(async () => {
@@ -144,7 +151,7 @@ export default function TrainPage() {
       id: `custom_${Date.now()}`,
       name: gestureName.trim(),
       emoji: gestureEmoji.trim() || "👋",
-      hand: gestureHand,
+      hand: "both" as HandType,
       samples,
       createdAt: Date.now(),
     };
@@ -157,7 +164,7 @@ export default function TrainPage() {
     );
     // Redirect to gesture library
     setTimeout(() => navigate("/gestures"), 1200);
-  }, [samples, gestureName, gestureEmoji, gestureHand, voiceBlob, navigate]);
+  }, [samples, gestureName, gestureEmoji, voiceBlob, navigate]);
 
   const handleDelete = useCallback(async (id: string) => {
     await deleteGesture(id);
@@ -227,10 +234,10 @@ export default function TrainPage() {
                 <div className="absolute top-0 left-0 right-0 bg-background/90 backdrop-blur-sm p-4 border-b border-primary/30 z-10">
                   <div className="text-center space-y-1">
                     <p className="text-lg font-bold font-display text-primary">
-                      Show your gesture
+                      {capturePhase === "right" ? "✋ Show RIGHT hand" : "🤚 Show LEFT hand"}
                     </p>
                     <p className="text-sm text-foreground font-mono">
-                      Hold your hand steady and click Capture Sample
+                      Hold your {capturePhase === "right" ? "right" : "left"} hand steady and click Capture
                     </p>
                   </div>
                 </div>
@@ -311,34 +318,6 @@ export default function TrainPage() {
                       />
                     </div>
                   </div>
-                  {/* Hand selector */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                      Hand
-                    </label>
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={gestureHand === "left" ? "default" : "outline"}
-                        onClick={() => setGestureHand("left")}
-                        disabled={isCapturing}
-                        className="flex-1 gap-1.5"
-                      >
-                        🤚 Left
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={gestureHand === "right" ? "default" : "outline"}
-                        onClick={() => setGestureHand("right")}
-                        disabled={isCapturing}
-                        className="flex-1 gap-1.5"
-                      >
-                        ✋ Right
-                      </Button>
-                    </div>
-                  </div>
                   <div className="flex gap-3">
                     {!isCapturing ? (
                       <Button
@@ -356,7 +335,7 @@ export default function TrainPage() {
                         className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 text-base px-6"
                       >
                         <Camera className="mr-2 h-4 w-4" />
-                        Capture Sample
+                        Capture {capturePhase === "right" ? "Right" : "Left"} Hand
                       </Button>
                     )}
                   </div>
@@ -375,7 +354,7 @@ export default function TrainPage() {
                     <div className="flex items-center gap-2 text-sm text-accent">
                       <CheckCircle2 className="h-4 w-4" />
                       <span className="font-medium">
-                        Gesture sample captured successfully!
+                        Both hands captured successfully!
                       </span>
                     </div>
 
