@@ -37,6 +37,7 @@ export default function TrainPage() {
     useHandDetection();
 
   const [gestureName, setGestureName] = useState("");
+  const [gestureEmoji, setGestureEmoji] = useState("");
   const [samples, setSamples] = useState<Landmark[][]>([]);
   const [captureStep, setCaptureStep] = useState(0);
   const [isCapturing, setIsCapturing] = useState(false);
