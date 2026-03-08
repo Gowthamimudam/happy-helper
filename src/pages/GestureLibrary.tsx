@@ -113,6 +113,36 @@ function VoiceRecordButton({ gestureName }: { gestureName: string }) {
   );
 }
 
+function EmojiPicker({ currentEmoji, onSelect }: { currentEmoji: string; onSelect: (emoji: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button className="group/emoji relative text-2xl mb-2 cursor-pointer hover:scale-110 transition-transform">
+          {currentEmoji || "👋"}
+          <span className="absolute -bottom-1 -right-1 opacity-0 group-hover/emoji:opacity-100 transition-opacity bg-muted rounded-full p-0.5">
+            <Pencil className="h-2.5 w-2.5 text-muted-foreground" />
+          </span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-64 p-2" align="start">
+        <p className="text-xs text-muted-foreground mb-2 font-mono">Choose emoji</p>
+        <div className="grid grid-cols-8 gap-1">
+          {EMOJI_OPTIONS.map((emoji) => (
+            <button
+              key={emoji}
+              onClick={() => { onSelect(emoji); setOpen(false); }}
+              className={`text-lg p-1 rounded hover:bg-accent/20 transition-colors ${emoji === currentEmoji ? "bg-accent/30 ring-1 ring-accent" : ""}`}
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export default function GestureLibrary() {
   const navigate = useNavigate();
   const [customGestures, setCustomGestures] = useState<StoredGesture[]>([]);
@@ -124,6 +154,12 @@ export default function GestureLibrary() {
 
   useEffect(() => {
     void refreshLibrary();
+  }, [refreshLibrary]);
+
+  const handleEmojiChange = useCallback(async (gesture: StoredGesture, newEmoji: string) => {
+    await saveGesture({ ...gesture, emoji: newEmoji });
+    await refreshLibrary();
+    toast.success(`Emoji updated for "${gesture.name}"`);
   }, [refreshLibrary]);
 
   const confirmDelete = useCallback(async () => {
