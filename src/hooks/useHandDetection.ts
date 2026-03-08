@@ -3,7 +3,17 @@ import { FilesetResolver, HandLandmarker } from "@mediapipe/tasks-vision";
 import { type GestureResult, type Landmark } from "@/lib/gestureClassifier";
 import { getAllGestures, matchCustomGesture, type StoredGesture } from "@/lib/gestureStore";
 
-export function useHandDetection() {
+export type GestureFilter = "all" | "gestures" | "alphabet" | "numbers";
+
+function filterGestures(gestures: StoredGesture[], filter: GestureFilter): StoredGesture[] {
+  if (filter === "all") return gestures;
+  if (filter === "alphabet") return gestures.filter((g) => g.name.startsWith("alpha_"));
+  if (filter === "numbers") return gestures.filter((g) => g.name.startsWith("num_"));
+  // "gestures" = custom only (no alpha_ or num_ prefix)
+  return gestures.filter((g) => !g.name.startsWith("alpha_") && !g.name.startsWith("num_"));
+}
+
+export function useHandDetection(filter: GestureFilter = "all") {
   const [isLoading, setIsLoading] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [gesture, setGesture] = useState<GestureResult | null>(null);
@@ -16,6 +26,8 @@ export function useHandDetection() {
   const streamRef = useRef<MediaStream | null>(null);
   const lastGestureTimeRef = useRef(0);
   const customGesturesRef = useRef<StoredGesture[]>([]);
+  const filterRef = useRef(filter);
+  filterRef.current = filter;
 
   const refreshGestureData = useCallback(async () => {
     try {
@@ -87,7 +99,8 @@ export function useHandDetection() {
       setLandmarks(results.landmarks as Landmark[][]);
 
       if (now - lastGestureTimeRef.current > 100) {
-        const customMatch = matchCustomGesture(lm, customGesturesRef.current);
+        const filtered = filterGestures(customGesturesRef.current, filterRef.current);
+        const customMatch = matchCustomGesture(lm, filtered);
         if (customMatch && customMatch.confidence > 0.3) {
           setGesture({ gesture: customMatch.name, confidence: customMatch.confidence });
         } else {

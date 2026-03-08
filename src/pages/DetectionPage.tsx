@@ -12,7 +12,7 @@ const VIDEO_HEIGHT = 480;
 
 export default function DetectionPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { isLoading, isRunning, gesture, landmarks, error, start, stop } = useHandDetection();
+  const { isLoading, isRunning, gesture, landmarks, error, start, stop } = useHandDetection("gestures");
   const { speak, stopSpeaking } = useTextToSpeech();
   const [speechEnabled, setSpeechEnabled] = useState(true);
   const [history, setHistory] = useState<string[]>([]);
