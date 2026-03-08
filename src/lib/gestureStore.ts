@@ -5,10 +5,13 @@
 
 import type { Landmark } from "./gestureClassifier";
 
+export type HandType = "left" | "right";
+
 export interface StoredGesture {
   id: string;
   name: string;
   emoji: string; // user-chosen emoji for this gesture
+  hand: HandType; // which hand this gesture is for
   samples: Landmark[][]; // each sample is 21 landmarks
   createdAt: number;
 }
