@@ -17,12 +17,6 @@ import {
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
-const EMOJI_OPTIONS = [
-  "👋", "✋", "🤚", "🖐️", "✌️", "🤞", "🤟", "🤘", "🤙", "👈", "👉", "👆", "👇", "☝️", "👍", "👎",
-  "✊", "👊", "🤛", "🤜", "👏", "🙌", "🤝", "🙏", "💪", "🖖", "🫰", "🫵", "🫱", "🫲",
-  "🫶", "👌", "🤏", "🤌", "🖕", "🫳", "🫴", "🤲", "🫷", "🫸",
-  "❤️", "⭐", "🔥", "💯", "✅", "❌", "⚡", "🎯", "🎉", "💡",
-];
 
 function VoiceRecordButton({ gestureName }: { gestureName: string }) {
   const [isRecording, setIsRecording] = useState(false);
