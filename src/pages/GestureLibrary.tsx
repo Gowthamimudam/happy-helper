@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, Sparkles, Mic, MicOff, Play, Upload } from "lucide-react";
-import { getAllGestures, deleteGesture, type StoredGesture } from "@/lib/gestureStore";
+import { Trash2, Sparkles, Mic, MicOff, Play, Upload, Pencil, X, Check, Save } from "lucide-react";
+import { getAllGestures, deleteGesture, saveGesture, type StoredGesture } from "@/lib/gestureStore";
 import { saveVoice, getVoice, deleteVoice } from "@/lib/voiceStore";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -138,23 +139,23 @@ function VoiceRecordButton({ gestureName }: { gestureName: string }) {
 }
 
 
-
-
 export default function GestureLibrary() {
   const navigate = useNavigate();
   const [customGestures, setCustomGestures] = useState<StoredGesture[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editingGesture, setEditingGesture] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editEmoji, setEditEmoji] = useState("");
 
   const refreshLibrary = useCallback(async () => {
     const all = await getAllGestures();
-    // Only show custom gestures (not alphabet/number gestures)
     setCustomGestures(all.filter((g) => !g.name.startsWith("alpha_") && !g.name.startsWith("num_")));
   }, []);
 
   useEffect(() => {
     void refreshLibrary();
   }, [refreshLibrary]);
-
 
   const confirmDelete = useCallback(async () => {
     if (!deleteTarget) return;
@@ -164,6 +165,50 @@ export default function GestureLibrary() {
     toast.success("Gesture removed from library.");
     setDeleteTarget(null);
   }, [deleteTarget, refreshLibrary]);
+
+  const startEditing = useCallback((gesture: StoredGesture) => {
+    setEditingGesture(gesture.id);
+    setEditName(gesture.name);
+    setEditEmoji(gesture.emoji || "👋");
+  }, []);
+
+  const cancelEditing = useCallback(() => {
+    setEditingGesture(null);
+    setEditName("");
+    setEditEmoji("");
+  }, []);
+
+  const saveEdit = useCallback(async () => {
+    if (!editingGesture || !editName.trim()) return;
+    const gesture = customGestures.find((g) => g.id === editingGesture);
+    if (!gesture) return;
+
+    const oldName = gesture.name;
+    const updated: StoredGesture = {
+      ...gesture,
+      name: editName.trim(),
+      emoji: editEmoji.trim() || "👋",
+    };
+    await saveGesture(updated);
+
+    // If name changed, migrate voice
+    if (oldName !== editName.trim()) {
+      const voice = await getVoice(oldName);
+      if (voice) {
+        await saveVoice(editName.trim(), voice.audioBlob);
+        await deleteVoice(oldName);
+      }
+    }
+
+    await refreshLibrary();
+    setEditingGesture(null);
+    toast.success(`Gesture updated to "${editName.trim()}"`);
+  }, [editingGesture, editName, editEmoji, customGestures, refreshLibrary]);
+
+  const toggleEditMode = useCallback(() => {
+    setEditMode((prev) => !prev);
+    setEditingGesture(null);
+  }, []);
 
   return (
     <div className="container pt-24 pb-12">
@@ -182,52 +227,124 @@ export default function GestureLibrary() {
         </div>
 
         {customGestures.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border bg-card p-8 text-center">
-            <Sparkles className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
-            <p className="text-muted-foreground font-medium">No gestures yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">
+          <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
+            <Sparkles className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
+            <p className="text-muted-foreground font-medium text-lg">No gestures yet</p>
+            <p className="mt-2 text-sm text-muted-foreground">
               Go to the Training page to teach your first gesture.
             </p>
-            <Button className="mt-4" onClick={() => navigate("/train")}>
+            <Button className="mt-6 rounded-xl px-8" onClick={() => navigate("/train")}>
               Train a Gesture
             </Button>
           </div>
         ) : (
           <div>
-            <h2 className="mb-4 flex items-center gap-2 text-sm font-mono uppercase tracking-wider text-muted-foreground">
+            <h2 className="mb-5 flex items-center gap-2 text-sm font-mono uppercase tracking-wider text-muted-foreground">
               <Sparkles className="h-4 w-4 text-accent" />
               Your Gestures ({customGestures.length})
             </h2>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <AnimatePresence>
-                {customGestures.map((g, i) => (
-                  <motion.div
-                    key={g.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="group relative rounded-xl border border-accent/30 bg-accent/5 p-4 transition-colors hover:border-accent/50"
-                  >
-                    <span className="text-2xl mb-2">{g.emoji || "👋"}</span>
-                    <h3 className="font-semibold text-foreground font-display">{g.name}</h3>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Both hands • {g.samples.length} sample{g.samples.length !== 1 ? "s" : ""}
-                    </p>
-                    <div className="flex items-center gap-1 mt-2">
-                      <VoiceRecordButton gestureName={g.name} />
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 w-7 p-0 ml-auto text-muted-foreground hover:text-destructive"
-                        onClick={() => setDeleteTarget({ id: g.id, name: g.name })}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </motion.div>
-                ))}
+                {customGestures.map((g, i) => {
+                  const isEditing = editingGesture === g.id;
+                  return (
+                    <motion.div
+                      key={g.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ delay: i * 0.05 }}
+                      className={`group relative rounded-2xl border p-5 transition-all ${
+                        isEditing
+                          ? "border-primary/50 bg-primary/5 ring-1 ring-primary/20"
+                          : editMode
+                            ? "border-accent/30 bg-accent/5 hover:border-accent/50 cursor-pointer"
+                            : "border-border/60 bg-card/50 hover:border-primary/20 hover:bg-card"
+                      }`}
+                      onClick={() => {
+                        if (editMode && !isEditing) startEditing(g);
+                      }}
+                    >
+                      {isEditing ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Input
+                              value={editEmoji}
+                              onChange={(e) => setEditEmoji(e.target.value)}
+                              className="w-14 text-center text-xl bg-secondary border-border"
+                              maxLength={4}
+                            />
+                            <Input
+                              value={editName}
+                              onChange={(e) => setEditName(e.target.value)}
+                              className="flex-1 bg-secondary border-border"
+                              placeholder="Gesture name"
+                              autoFocus
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <Button size="sm" onClick={saveEdit} className="flex-1 gap-1.5">
+                              <Check className="h-3.5 w-3.5" />
+                              Save
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={cancelEditing} className="gap-1.5">
+                              <X className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="text-2xl mb-2 block">{g.emoji || "👋"}</span>
+                          <h3 className="font-semibold text-foreground font-display text-lg">{g.name}</h3>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            Both hands • {g.samples.length} sample{g.samples.length !== 1 ? "s" : ""}
+                          </p>
+                          {!editMode && (
+                            <div className="flex items-center gap-1 mt-2">
+                              <VoiceRecordButton gestureName={g.name} />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 w-7 p-0 ml-auto text-muted-foreground hover:text-destructive"
+                                onClick={() => setDeleteTarget({ id: g.id, name: g.name })}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          )}
+                          {editMode && !isEditing && (
+                            <div className="mt-3 text-xs font-mono text-accent flex items-center gap-1">
+                              <Pencil className="h-3 w-3" /> Click to edit
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
+            </div>
+
+            {/* Edit button at bottom */}
+            <div className="mt-8 flex justify-center">
+              <Button
+                onClick={toggleEditMode}
+                variant={editMode ? "default" : "outline"}
+                size="lg"
+                className={`gap-2 rounded-xl px-10 h-12 text-base ${editMode ? "glow-primary" : "hover:border-primary/40"}`}
+              >
+                {editMode ? (
+                  <>
+                    <Check className="h-5 w-5" />
+                    Done Editing
+                  </>
+                ) : (
+                  <>
+                    <Pencil className="h-5 w-5" />
+                    Edit Gestures
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         )}
