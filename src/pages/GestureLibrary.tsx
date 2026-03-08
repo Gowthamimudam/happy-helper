@@ -34,6 +34,7 @@ function VoiceRecordButton({ gestureName }: { gestureName: string }) {
   const [hasVoice, setHasVoice] = useState(false);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     getVoice(gestureName).then((v) => setHasVoice(!!v));
