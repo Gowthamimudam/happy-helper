@@ -119,7 +119,7 @@ function AlphabetTrain() {
     if (!selectedLetter) return;
     resetCapture();
     setCapturePhase("right");
-    toast.info(`Show the sign for "${selectedLetter}" with your RIGHT hand.`);
+    toast.info(`Show the sign for "${selectedLetter}" and click Capture.`);
   }, [selectedLetter, resetCapture]);
 
   const captureSample = useCallback(() => {
@@ -128,25 +128,18 @@ function AlphabetTrain() {
       return;
     }
     const lm = landmarks[0];
-    const newSamples = [...samples, [...lm]];
-    setSamples(newSamples);
-
-    if (capturePhase === "right") {
-      setCapturePhase("left");
-      toast.success(`✋ Right hand captured for "${selectedLetter}"! Now show LEFT hand.`);
-    } else if (capturePhase === "left") {
-      setCapturePhase("done");
-      toast.success(`🤚 Left hand captured! Ready to save "${selectedLetter}".`);
-    }
-  }, [landmarks, samples, capturePhase, selectedLetter]);
+    setSamples([[...lm]]);
+    setCapturePhase("done");
+    toast.success(`✋ Hand captured for "${selectedLetter}"! Ready to save.`);
+  }, [landmarks, selectedLetter]);
 
   const handleSave = useCallback(async () => {
-    if (!selectedLetter || samples.length < 2) return;
+    if (!selectedLetter || samples.length < 1) return;
     const gesture: StoredGesture = {
       id: `alpha_${selectedLetter}_${Date.now()}`,
       name: `alpha_${selectedLetter}`,
       emoji: selectedLetter,
-      hand: "both" as HandType,
+      hand: "right" as HandType,
       samples,
       createdAt: Date.now(),
     };
@@ -203,14 +196,14 @@ function AlphabetTrain() {
           )}
 
           {/* Capture instruction overlay */}
-          {capturePhase !== "idle" && capturePhase !== "done" && (
+          {capturePhase === "right" && (
             <div className="absolute top-0 left-0 right-0 bg-background/90 backdrop-blur-sm p-4 border-b border-primary/30 z-10">
               <div className="text-center space-y-1">
                 <p className="text-2xl font-bold font-display text-primary">
                   {selectedLetter}
                 </p>
                 <p className="text-lg font-bold font-display text-accent">
-                  {capturePhase === "right" ? "✋ Show RIGHT hand" : "🤚 Show LEFT hand"}
+                  ✋ Show your hand sign
                 </p>
                 <p className="text-sm text-foreground font-mono">
                   Hold steady and click Capture
@@ -250,7 +243,7 @@ function AlphabetTrain() {
                   className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 text-base"
                 >
                   <Camera className="mr-2 h-4 w-4" />
-                  Capture {capturePhase === "right" ? "Right" : "Left"} Hand
+                  Capture Hand Sign
                 </Button>
               )}
             </div>
@@ -266,7 +259,7 @@ function AlphabetTrain() {
               >
                 <div className="flex items-center gap-2 text-sm text-accent">
                   <CheckCircle2 className="h-4 w-4" />
-                  <span className="font-medium">Both hands captured for "{selectedLetter}"!</span>
+                  <span className="font-medium">Hand sign captured for "{selectedLetter}"!</span>
                 </div>
                 <Button onClick={handleSave} className="w-full gap-2">
                   Save Letter "{selectedLetter}"
