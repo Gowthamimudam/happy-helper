@@ -344,8 +344,8 @@ export default function GestureLibrary() {
               </AnimatePresence>
             </div>
 
-            {/* Edit button at bottom */}
-            <div className="mt-8 flex justify-center">
+            {/* Action buttons */}
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Button
                 onClick={toggleEditMode}
                 variant={editMode ? "default" : "outline"}
@@ -363,6 +363,31 @@ export default function GestureLibrary() {
                     Edit Gestures
                   </>
                 )}
+              </Button>
+              <Button
+                onClick={handleExport}
+                variant="outline"
+                size="lg"
+                className="gap-2 rounded-xl px-8 h-12 text-base hover:border-primary/40"
+              >
+                <Download className="h-5 w-5" />
+                Export
+              </Button>
+              <input
+                ref={importInputRef}
+                type="file"
+                accept=".json"
+                className="hidden"
+                onChange={handleImport}
+              />
+              <Button
+                onClick={() => importInputRef.current?.click()}
+                variant="outline"
+                size="lg"
+                className="gap-2 rounded-xl px-8 h-12 text-base hover:border-primary/40"
+              >
+                <FileUp className="h-5 w-5" />
+                Import
               </Button>
             </div>
           </div>
