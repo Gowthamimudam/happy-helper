@@ -26,7 +26,7 @@ export default function DetectionPage() {
 
   // Track gesture history
   useEffect(() => {
-    if (gesture && gesture.gesture !== "Unknown" && gesture.confidence > 0.6) {
+    if (gesture && gesture.gesture !== "Unknown" && gesture.confidence > 0.5) {
       setHistory((prev) => {
         const last = prev[prev.length - 1];
         if (last === gesture.gesture) return prev;
