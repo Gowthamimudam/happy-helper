@@ -253,15 +253,18 @@ export default function GestureLibrary() {
           onChange={handleImport}
         />
 
-        <div className="mb-6 flex justify-center">
-          <Button
-            variant="outline"
-            className="rounded-xl px-8 gap-2"
-            onClick={() => importInputRef.current?.click()}
-          >
-            <FileUp className="h-4 w-4" />
-            Import Gestures
-          </Button>
+        <div className="mb-6 rounded-2xl border border-border bg-card/70 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">Import your backup JSON to restore trained gestures.</p>
+            <Button
+              variant="default"
+              className="rounded-xl px-8 gap-2"
+              onClick={() => importInputRef.current?.click()}
+            >
+              <FileUp className="h-4 w-4" />
+              Import Gestures
+            </Button>
+          </div>
         </div>
 
         {customGestures.length === 0 ? (
@@ -407,6 +410,18 @@ export default function GestureLibrary() {
           </div>
         )}
       </motion.div>
+
+      <div className="fixed bottom-4 right-4 z-40">
+        <Button
+          onClick={() => importInputRef.current?.click()}
+          size="lg"
+          className="rounded-full px-6 h-12 gap-2 shadow-lg"
+          aria-label="Import gestures backup"
+        >
+          <FileUp className="h-5 w-5" />
+          Import Gestures
+        </Button>
+      </div>
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
