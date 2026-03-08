@@ -67,7 +67,7 @@ export default function TrainPage() {
 
   const resetCapture = useCallback(() => {
     setIsCapturing(false);
-    setCaptureStep(0);
+    setCapturePhase("idle");
     setSamples([]);
     setReadyToSave(false);
     setVoiceBlob(null);
