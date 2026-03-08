@@ -259,7 +259,7 @@ function AlphabetTrain() {
               >
                 <div className="flex items-center gap-2 text-sm text-accent">
                   <CheckCircle2 className="h-4 w-4" />
-                  <span className="font-medium">Both hands captured for "{selectedLetter}"!</span>
+                  <span className="font-medium">Hand sign captured for "{selectedLetter}"!</span>
                 </div>
                 <Button onClick={handleSave} className="w-full gap-2">
                   Save Letter "{selectedLetter}"
