@@ -196,14 +196,14 @@ function AlphabetTrain() {
           )}
 
           {/* Capture instruction overlay */}
-          {capturePhase !== "idle" && capturePhase !== "done" && (
+          {capturePhase === "right" && (
             <div className="absolute top-0 left-0 right-0 bg-background/90 backdrop-blur-sm p-4 border-b border-primary/30 z-10">
               <div className="text-center space-y-1">
                 <p className="text-2xl font-bold font-display text-primary">
                   {selectedLetter}
                 </p>
                 <p className="text-lg font-bold font-display text-accent">
-                  {capturePhase === "right" ? "✋ Show RIGHT hand" : "🤚 Show LEFT hand"}
+                  ✋ Show your hand sign
                 </p>
                 <p className="text-sm text-foreground font-mono">
                   Hold steady and click Capture
