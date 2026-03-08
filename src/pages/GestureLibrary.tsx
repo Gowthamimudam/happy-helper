@@ -245,6 +245,25 @@ export default function GestureLibrary() {
           </p>
         </div>
 
+        <input
+          ref={importInputRef}
+          type="file"
+          accept=".json"
+          className="hidden"
+          onChange={handleImport}
+        />
+
+        <div className="mb-6 flex justify-center">
+          <Button
+            variant="outline"
+            className="rounded-xl px-8 gap-2"
+            onClick={() => importInputRef.current?.click()}
+          >
+            <FileUp className="h-4 w-4" />
+            Import Gestures
+          </Button>
+        </div>
+
         {customGestures.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
             <Sparkles className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
@@ -255,21 +274,6 @@ export default function GestureLibrary() {
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Button className="rounded-xl px-8" onClick={() => navigate("/train")}>
                 Train a Gesture
-              </Button>
-              <input
-                ref={importInputRef}
-                type="file"
-                accept=".json"
-                className="hidden"
-                onChange={handleImport}
-              />
-              <Button
-                variant="outline"
-                className="rounded-xl px-8 gap-2"
-                onClick={() => importInputRef.current?.click()}
-              >
-                <FileUp className="h-4 w-4" />
-                Import Gestures
               </Button>
             </div>
           </div>
