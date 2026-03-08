@@ -18,6 +18,7 @@ import HandCanvas from "@/components/HandCanvas";
 import { useHandDetection } from "@/hooks/useHandDetection";
 import {
   type StoredGesture,
+  type HandType,
   getAllGestures,
   saveGesture,
   deleteGesture,
