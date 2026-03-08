@@ -17,16 +17,16 @@ export default function DetectionPage() {
   const [speechEnabled, setSpeechEnabled] = useState(true);
   const [history, setHistory] = useState<string[]>([]);
 
-  // Speak detected gesture
+  // Speak detected gesture — triggered by detection which starts after user click (Start button)
   useEffect(() => {
-    if (gesture && gesture.gesture !== "Unknown" && gesture.confidence > 0.6 && speechEnabled && isRunning) {
+    if (gesture && gesture.gesture !== "Unknown" && gesture.confidence > 0.5 && speechEnabled && isRunning) {
       speak(gesture.gesture.split(" / ")[0]);
     }
   }, [gesture, speechEnabled, speak, isRunning]);
 
   // Track gesture history
   useEffect(() => {
-    if (gesture && gesture.gesture !== "Unknown" && gesture.confidence > 0.6) {
+    if (gesture && gesture.gesture !== "Unknown" && gesture.confidence > 0.5) {
       setHistory((prev) => {
         const last = prev[prev.length - 1];
         if (last === gesture.gesture) return prev;

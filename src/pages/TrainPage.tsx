@@ -73,9 +73,9 @@ export default function TrainPage() {
     const interval = setInterval(() => {
       if (landmarks && landmarks.length > 0) {
         setSamples((prev) => {
-          if (prev.length >= 30) {
+          if (prev.length >= 5) {
             setIsCapturing(false);
-            toast.success("Captured 30 samples!");
+            toast.success("Captured 5 samples! You can save now.");
             return prev;
           }
           return [...prev, [...landmarks[0]]];
@@ -87,8 +87,8 @@ export default function TrainPage() {
   }, [isCapturing, isRunning, landmarks]);
 
   const handleSave = useCallback(async () => {
-    if (samples.length < 5) {
-      toast.error("Need at least 5 samples. Keep capturing.");
+    if (samples.length < 3) {
+      toast.error("Need at least 3 samples. Keep capturing.");
       return;
     }
     const gesture: StoredGesture = {
@@ -170,7 +170,7 @@ export default function TrainPage() {
                 <div className="absolute top-3 left-3 flex items-center gap-2 rounded-full bg-destructive/90 px-3 py-1 backdrop-blur-sm">
                   <div className="h-2 w-2 rounded-full bg-destructive-foreground animate-pulse" />
                   <span className="text-xs font-mono text-destructive-foreground">
-                    REC {samples.length}/30
+                    REC {samples.length}/5
                   </span>
                 </div>
               )}
@@ -261,8 +261,8 @@ export default function TrainPage() {
                 <li>Start the camera</li>
                 <li>Type a gesture name (e.g. "Water")</li>
                 <li>Hold the gesture and press Record</li>
-                <li>Keep the pose steady for ~6 seconds</li>
-                <li>Save when 30 samples are captured</li>
+                <li>Keep the pose steady for ~1 second</li>
+                <li>Save when 5 samples are captured</li>
                 <li>Go to Detect page — your gesture works!</li>
               </ol>
             </div>
