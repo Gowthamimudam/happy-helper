@@ -311,6 +311,34 @@ export default function TrainPage() {
                       />
                     </div>
                   </div>
+                  {/* Hand selector */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+                      Hand
+                    </label>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={gestureHand === "left" ? "default" : "outline"}
+                        onClick={() => setGestureHand("left")}
+                        disabled={isCapturing}
+                        className="flex-1 gap-1.5"
+                      >
+                        🤚 Left
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={gestureHand === "right" ? "default" : "outline"}
+                        onClick={() => setGestureHand("right")}
+                        disabled={isCapturing}
+                        className="flex-1 gap-1.5"
+                      >
+                        ✋ Right
+                      </Button>
+                    </div>
+                  </div>
                   <div className="flex gap-3">
                     {!isCapturing ? (
                       <Button
