@@ -147,6 +147,25 @@ export default function GestureLibrary() {
   const [editingGesture, setEditingGesture] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editEmoji, setEditEmoji] = useState("");
+  const importInputRef = useRef<HTMLInputElement>(null);
+
+  const handleExport = useCallback(async () => {
+    await exportGestures();
+    toast.success("Gestures exported!");
+  }, []);
+
+  const handleImport = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const count = await importGestures(file);
+      await refreshLibrary();
+      toast.success(`Imported ${count} gesture(s)!`);
+    } catch {
+      toast.error("Invalid gesture file");
+    }
+    if (importInputRef.current) importInputRef.current.value = "";
+  }, [refreshLibrary]);
 
   const refreshLibrary = useCallback(async () => {
     const all = await getAllGestures();
