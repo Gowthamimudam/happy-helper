@@ -394,13 +394,6 @@ export default function GestureLibrary() {
                 <Download className="h-5 w-5" />
                 Export
               </Button>
-              <input
-                ref={importInputRef}
-                type="file"
-                accept=".json"
-                className="hidden"
-                onChange={handleImport}
-              />
               <Button
                 onClick={() => importInputRef.current?.click()}
                 variant="outline"
