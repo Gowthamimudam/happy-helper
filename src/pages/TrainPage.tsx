@@ -331,47 +331,6 @@ export default function TrainPage() {
                 </div>
               )}
 
-              {/* Progress indicator */}
-              <AnimatePresence>
-                {isCapturing && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-2"
-                  >
-                    <div className="flex items-center justify-between text-xs font-mono text-muted-foreground">
-                      <span>
-                        Sample {captureStep}/{REQUIRED_SAMPLES}
-                      </span>
-                      <span>Expected Direction: {currentDirection}</span>
-                    </div>
-                    <Progress value={progressPercent} className="h-2" />
-                    {/* Direction steps */}
-                    <div className="flex gap-2">
-                      {DIRECTIONS_ORDER.map((dir, i) => (
-                        <div
-                          key={dir}
-                          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-mono transition-colors ${
-                            i < captureStep
-                              ? "bg-accent/20 text-accent"
-                              : i === captureStep
-                                ? "bg-primary/20 text-primary border border-primary/30"
-                                : "bg-secondary text-muted-foreground"
-                          }`}
-                        >
-                          {i < captureStep ? (
-                            <CheckCircle2 className="h-3.5 w-3.5" />
-                          ) : (
-                            DIRECTION_ICONS[dir]
-                          )}
-                          {dir}
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
               {/* Ready to save */}
               <AnimatePresence>
