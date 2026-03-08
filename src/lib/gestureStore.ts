@@ -108,20 +108,21 @@ export function landmarkDistance(a: number[], b: number[]): number {
 export function matchCustomGesture(
   liveLandmarks: Landmark[],
   storedGestures: StoredGesture[],
-  threshold = 0.15
+  threshold = 0.18
 ): { name: string; confidence: number } | null {
   const liveNorm = normalizeLandmarks(liveLandmarks);
   let bestName = "";
   let bestDist = Infinity;
 
   for (const gesture of storedGestures) {
-    // Average distance across all samples
-    let totalDist = 0;
+    // Use minimum distance across samples (best match) for more precise detection
+    let minDist = Infinity;
     for (const sample of gesture.samples) {
       const sampleNorm = normalizeLandmarks(sample);
-      totalDist += landmarkDistance(liveNorm, sampleNorm);
+      const dist = landmarkDistance(liveNorm, sampleNorm);
+      if (dist < minDist) minDist = dist;
     }
-    const avgDist = totalDist / gesture.samples.length;
+    const avgDist = minDist;
 
     if (avgDist < bestDist) {
       bestDist = avgDist;

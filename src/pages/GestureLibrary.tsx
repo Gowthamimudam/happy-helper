@@ -1,10 +1,96 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
-import { Trash2, Hand, Sparkles } from "lucide-react";
+import { Trash2, Hand, Sparkles, Mic, MicOff, Play } from "lucide-react";
 import { SUPPORTED_GESTURES } from "@/lib/gestureClassifier";
 import { getAllGestures, deleteGesture, type StoredGesture } from "@/lib/gestureStore";
+import { saveVoice, getVoice, deleteVoice } from "@/lib/voiceStore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+
+function VoiceRecordButton({ gestureName }: { gestureName: string }) {
+  const [isRecording, setIsRecording] = useState(false);
+  const [hasVoice, setHasVoice] = useState(false);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+
+  useEffect(() => {
+    getVoice(gestureName).then((v) => setHasVoice(!!v));
+  }, [gestureName]);
+
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      chunksRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+      recorder.onstop = async () => {
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        await saveVoice(gestureName, blob);
+        stream.getTracks().forEach((t) => t.stop());
+        setHasVoice(true);
+        toast.success(`Voice recorded for "${gestureName}"`);
+      };
+      recorderRef.current = recorder;
+      recorder.start();
+      setIsRecording(true);
+    } catch {
+      toast.error("Microphone access denied");
+    }
+  }, [gestureName]);
+
+  const stopRecording = useCallback(() => {
+    recorderRef.current?.stop();
+    setIsRecording(false);
+  }, []);
+
+  const playVoice = useCallback(async () => {
+    const v = await getVoice(gestureName);
+    if (v) {
+      const url = URL.createObjectURL(v.audioBlob);
+      const audio = new Audio(url);
+      audio.onended = () => URL.revokeObjectURL(url);
+      audio.play();
+    }
+  }, [gestureName]);
+
+  return (
+    <div className="flex items-center gap-1 mt-2">
+      {!isRecording ? (
+        <Button
+          size="sm"
+          variant={hasVoice ? "secondary" : "outline"}
+          onClick={startRecording}
+          className="h-7 px-2 gap-1 text-xs"
+        >
+          <Mic className="h-3 w-3" />
+          {hasVoice ? "Re-record" : "Record"}
+        </Button>
+      ) : (
+        <Button
+          size="sm"
+          variant="destructive"
+          onClick={stopRecording}
+          className="h-7 px-2 gap-1 text-xs"
+        >
+          <MicOff className="h-3 w-3 animate-pulse" />
+          Stop
+        </Button>
+      )}
+      {hasVoice && !isRecording && (
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={playVoice}
+          className="h-7 w-7 p-0"
+        >
+          <Play className="h-3 w-3" />
+        </Button>
+      )}
+    </div>
+  );
+}
 
 export default function GestureLibrary() {
   const [customGestures, setCustomGestures] = useState<StoredGesture[]>([]);
@@ -15,6 +101,7 @@ export default function GestureLibrary() {
 
   const handleDelete = async (id: string, name: string) => {
     await deleteGesture(id);
+    await deleteVoice(name);
     setCustomGestures(await getAllGestures());
     toast.success(`"${name}" removed from library`);
   };
@@ -31,7 +118,7 @@ export default function GestureLibrary() {
             Gesture <span className="text-gradient">Library</span>
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            All supported gestures — built-in and custom trained
+            All supported gestures — built-in and custom trained. Record voice for any gesture.
           </p>
         </div>
 
@@ -56,6 +143,7 @@ export default function GestureLibrary() {
                   <p className="mt-1 text-xs text-muted-foreground">
                     {g.samples.length} samples • Custom trained
                   </p>
+                  <VoiceRecordButton gestureName={g.name} />
                   <Button
                     size="icon"
                     variant="ghost"
@@ -88,6 +176,7 @@ export default function GestureLibrary() {
                 <div className="mb-2 text-2xl">{g.emoji}</div>
                 <h3 className="font-semibold text-foreground font-display">{g.name}</h3>
                 <p className="mt-1 text-xs text-muted-foreground">{g.description}</p>
+                <VoiceRecordButton gestureName={g.name} />
               </motion.div>
             ))}
           </div>
