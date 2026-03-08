@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import DetectionPage from "./pages/DetectionPage";
 import GestureLibrary from "./pages/GestureLibrary";
 import TrainPage from "./pages/TrainPage";
+import AlphabetMode from "./pages/AlphabetMode";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/detect" element={<DetectionPage />} />
           <Route path="/gestures" element={<GestureLibrary />} />
           <Route path="/train" element={<TrainPage />} />
+          <Route path="/alphabet" element={<AlphabetMode />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
