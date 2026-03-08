@@ -213,7 +213,7 @@ export default function TrainPage() {
             Train <span className="text-gradient">Custom Gestures</span>
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Record gestures from 4 directions for accurate recognition
+            Record a gesture sample for accurate recognition
           </p>
         </div>
 
