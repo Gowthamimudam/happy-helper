@@ -15,6 +15,15 @@ export function useHandDetection() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const lastGestureTimeRef = useRef(0);
+  const customGesturesRef = useRef<StoredGesture[]>([]);
+
+  // Load custom gestures and refresh periodically
+  useEffect(() => {
+    const load = () => getAllGestures().then((g) => { customGesturesRef.current = g; });
+    load();
+    const interval = setInterval(load, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const initialize = useCallback(async () => {
     if (handLandmarkerRef.current) return;
