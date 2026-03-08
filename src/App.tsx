@@ -25,6 +25,7 @@ const App = () => (
           <Route path="/detect" element={<DetectionPage />} />
           <Route path="/gestures" element={<GestureLibrary />} />
           <Route path="/train" element={<TrainPage />} />
+          <Route path="/alphabet" element={<AlphabetMode />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
