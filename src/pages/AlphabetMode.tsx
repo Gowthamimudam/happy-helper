@@ -243,7 +243,7 @@ function AlphabetTrain() {
                   className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 text-base"
                 >
                   <Camera className="mr-2 h-4 w-4" />
-                  Capture {capturePhase === "right" ? "Right" : "Left"} Hand
+                  Capture Hand Sign
                 </Button>
               )}
             </div>
