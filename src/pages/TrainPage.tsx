@@ -87,8 +87,8 @@ export default function TrainPage() {
   }, [isCapturing, isRunning, landmarks]);
 
   const handleSave = useCallback(async () => {
-    if (samples.length < 5) {
-      toast.error("Need at least 5 samples. Keep capturing.");
+    if (samples.length < 3) {
+      toast.error("Need at least 3 samples. Keep capturing.");
       return;
     }
     const gesture: StoredGesture = {
