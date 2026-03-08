@@ -347,18 +347,6 @@ export default function TrainPage() {
                       </span>
                     </div>
 
-                    {/* Direction summary */}
-                    <div className="flex gap-2">
-                      {DIRECTIONS_ORDER.map((dir) => (
-                        <div
-                          key={dir}
-                          className="flex items-center gap-1 rounded-md bg-accent/20 px-2 py-1 text-xs font-mono text-accent"
-                        >
-                          <CheckCircle2 className="h-3 w-3" />
-                          {dir}
-                        </div>
-                      ))}
-                    </div>
 
                     {/* Voice recording */}
                     <div className="flex items-center gap-3">
