@@ -12,7 +12,7 @@ const VIDEO_HEIGHT = 480;
 
 export default function DetectionPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { isLoading, isRunning, gesture, landmarks, error, start, stop } = useHandDetection();
+  const { isLoading, isRunning, gesture, landmarks, error, start, stop } = useHandDetection("gestures");
   const { speak, stopSpeaking } = useTextToSpeech();
   const [speechEnabled, setSpeechEnabled] = useState(true);
   const [history, setHistory] = useState<string[]>([]);
@@ -140,10 +140,10 @@ export default function DetectionPage() {
                 <Button
                   onClick={handleStop}
                   variant="destructive"
-                  className="flex-1"
+                  className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
                   <Square className="mr-2 h-4 w-4" />
-                  Stop
+                  Stop Camera
                 </Button>
               )}
               <Button

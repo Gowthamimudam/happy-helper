@@ -352,7 +352,7 @@ function AlphabetTrain() {
 /* ─── DETECT TAB ─── */
 function AlphabetDetect() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { isLoading, isRunning, landmarks, error, start, stop } = useHandDetection();
+  const { isLoading, isRunning, landmarks, error, start, stop } = useHandDetection("alphabet");
   const [speechEnabled, setSpeechEnabled] = useState(true);
 
   const [currentLetter, setCurrentLetter] = useState<string | null>(null);
