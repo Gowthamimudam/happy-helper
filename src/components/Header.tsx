@@ -8,6 +8,7 @@ const navItems = [
   { path: "/gestures", label: "Gestures", icon: BookOpen },
   { path: "/train", label: "Train", icon: GraduationCap },
   { path: "/alphabet", label: "Alphabet", icon: Type },
+  { path: "/numbers", label: "Numbers", icon: Hash },
 ];
 
 export default function Header() {
