@@ -164,7 +164,7 @@ export default function TrainPage() {
     );
     // Redirect to gesture library
     setTimeout(() => navigate("/gestures"), 1200);
-  }, [samples, gestureName, gestureEmoji, gestureHand, voiceBlob, navigate]);
+  }, [samples, gestureName, gestureEmoji, voiceBlob, navigate]);
 
   const handleDelete = useCallback(async (id: string) => {
     await deleteGesture(id);
