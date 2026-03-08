@@ -347,7 +347,7 @@ function NumbersTrain() {
 /* ─── DETECT TAB ─── */
 function NumbersDetect() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { isLoading, isRunning, landmarks, error, start, stop } = useHandDetection();
+  const { isLoading, isRunning, landmarks, error, start, stop } = useHandDetection("numbers");
   const [speechEnabled, setSpeechEnabled] = useState(true);
 
   const [currentNumber, setCurrentNumber] = useState<string | null>(null);
