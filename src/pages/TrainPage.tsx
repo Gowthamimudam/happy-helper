@@ -159,7 +159,7 @@ export default function TrainPage() {
     toast.success("Gesture deleted");
   }, []);
 
-  const progressPercent = (captureStep / REQUIRED_SAMPLES) * 100;
+  
 
   return (
     <div className="container pt-24 pb-12">
