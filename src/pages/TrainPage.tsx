@@ -10,16 +10,10 @@ import {
   CheckCircle2,
   Mic,
   MicOff,
-  Compass,
   AlertTriangle,
-  ArrowUp,
-  ArrowLeft,
-  ArrowDown,
-  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import HandCanvas from "@/components/HandCanvas";
 import { useHandDetection } from "@/hooks/useHandDetection";
 import {
@@ -30,24 +24,11 @@ import {
 } from "@/lib/gestureStore";
 import { saveVoice } from "@/lib/voiceStore";
 import type { Landmark } from "@/lib/gestureClassifier";
-import {
-  DIRECTIONS_ORDER,
-  DIRECTION_INSTRUCTIONS,
-  detectPalmDirection,
-  type Direction,
-} from "@/lib/palmOrientation";
 import { toast } from "sonner";
 
 const VIDEO_WIDTH = 640;
 const VIDEO_HEIGHT = 480;
-const REQUIRED_SAMPLES = 4;
-
-const DIRECTION_ICONS: Record<Direction, React.ReactNode> = {
-  NORTH: <ArrowUp className="h-5 w-5" />,
-  WEST: <ArrowLeft className="h-5 w-5" />,
-  SOUTH: <ArrowDown className="h-5 w-5" />,
-  EAST: <ArrowRight className="h-5 w-5" />,
-};
+const REQUIRED_SAMPLES = 1;
 
 export default function TrainPage() {
   const navigate = useNavigate();
@@ -91,7 +72,7 @@ export default function TrainPage() {
     setDirectionWarning(null);
   }, []);
 
-  const currentDirection = DIRECTIONS_ORDER[captureStep] ?? "NORTH";
+  
 
   const startCapturing = useCallback(() => {
     if (!gestureName.trim()) {
@@ -101,7 +82,7 @@ export default function TrainPage() {
     resetCapture();
     setIsCapturing(true);
     setCaptureStep(0);
-    toast.info(DIRECTION_INSTRUCTIONS["NORTH"]);
+    toast.info("Show your gesture to the camera and click Capture Sample.");
   }, [gestureName, resetCapture]);
 
   const captureSample = useCallback(() => {
@@ -111,35 +92,14 @@ export default function TrainPage() {
     }
 
     const lm = landmarks[0];
-    const detected = detectPalmDirection(lm);
-    const expected = DIRECTIONS_ORDER[captureStep];
-
-    if (detected !== expected) {
-      setDirectionWarning(
-        `Wrong direction detected. Please rotate your hand toward ${expected}.`
-      );
-      return;
-    }
-
     setDirectionWarning(null);
     const newSamples = [...samples, [...lm]];
     setSamples(newSamples);
-    const nextStep = newSamples.length;
-    setCaptureStep(nextStep);
-
-    if (nextStep >= REQUIRED_SAMPLES) {
-      setIsCapturing(false);
-      setReadyToSave(true);
-      toast.success(
-        "Gesture successfully trained with 4 directional samples!"
-      );
-    } else {
-      toast.success(
-        `Sample ${nextStep}/${REQUIRED_SAMPLES} (${expected}) captured!`
-      );
-      toast.info(DIRECTION_INSTRUCTIONS[DIRECTIONS_ORDER[nextStep]]);
-    }
-  }, [landmarks, captureStep, samples]);
+    setCaptureStep(1);
+    setIsCapturing(false);
+    setReadyToSave(true);
+    toast.success("Gesture sample captured successfully!");
+  }, [landmarks, samples]);
 
   // Voice recording
   const startVoiceRecording = useCallback(async () => {
@@ -172,7 +132,7 @@ export default function TrainPage() {
   const handleSave = useCallback(async () => {
     if (samples.length < REQUIRED_SAMPLES) {
       toast.error(
-        "Training incomplete. Please record all 4 directional samples."
+        "Training incomplete. Please capture the gesture sample."
       );
       return;
     }
@@ -199,7 +159,7 @@ export default function TrainPage() {
     toast.success("Gesture deleted");
   }, []);
 
-  const progressPercent = (captureStep / REQUIRED_SAMPLES) * 100;
+  
 
   return (
     <div className="container pt-24 pb-12">
@@ -213,7 +173,7 @@ export default function TrainPage() {
             Train <span className="text-gradient">Custom Gestures</span>
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Record gestures from 4 directions for accurate recognition
+            Record a gesture sample for accurate recognition
           </p>
         </div>
 
@@ -256,33 +216,16 @@ export default function TrainPage() {
                 </div>
               )}
 
-              {/* Large step instruction overlay during capture */}
+              {/* Capture instruction overlay */}
               {isCapturing && (
                 <div className="absolute top-0 left-0 right-0 bg-background/90 backdrop-blur-sm p-4 border-b border-primary/30 z-10">
                   <div className="text-center space-y-1">
                     <p className="text-lg font-bold font-display text-primary">
-                      Sample {captureStep + 1} of {REQUIRED_SAMPLES}
+                      Show your gesture
                     </p>
                     <p className="text-sm text-foreground font-mono">
-                      {DIRECTION_INSTRUCTIONS[currentDirection]}
+                      Hold your hand steady and click Capture Sample
                     </p>
-                    <div className="inline-flex items-center gap-2 rounded-full bg-primary/20 px-4 py-1.5 mt-1">
-                      {DIRECTION_ICONS[currentDirection]}
-                      <span className="text-sm font-bold font-mono text-primary">
-                        Expected Direction: {currentDirection}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Success overlay after each capture */}
-              {isCapturing && captureStep > 0 && (
-                <div className="absolute bottom-3 left-3 right-3 z-10">
-                  <div className="rounded-lg bg-accent/90 backdrop-blur-sm px-3 py-2 text-center">
-                    <span className="text-xs font-mono text-accent-foreground">
-                      ✓ Sample {captureStep} recorded successfully — now show {currentDirection}
-                    </span>
                   </div>
                 </div>
               )}
@@ -362,56 +305,13 @@ export default function TrainPage() {
                       size="lg"
                       className="bg-accent text-accent-foreground hover:bg-accent/90 text-base px-6"
                     >
-                      {DIRECTION_ICONS[currentDirection]}
-                      <span className="ml-2">
-                        Capture Sample {captureStep + 1} ({currentDirection})
-                      </span>
+                      <Camera className="mr-2 h-4 w-4" />
+                      Capture Sample
                     </Button>
                   )}
                 </div>
               )}
 
-              {/* Progress indicator */}
-              <AnimatePresence>
-                {isCapturing && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-2"
-                  >
-                    <div className="flex items-center justify-between text-xs font-mono text-muted-foreground">
-                      <span>
-                        Sample {captureStep}/{REQUIRED_SAMPLES}
-                      </span>
-                      <span>Expected Direction: {currentDirection}</span>
-                    </div>
-                    <Progress value={progressPercent} className="h-2" />
-                    {/* Direction steps */}
-                    <div className="flex gap-2">
-                      {DIRECTIONS_ORDER.map((dir, i) => (
-                        <div
-                          key={dir}
-                          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-mono transition-colors ${
-                            i < captureStep
-                              ? "bg-accent/20 text-accent"
-                              : i === captureStep
-                                ? "bg-primary/20 text-primary border border-primary/30"
-                                : "bg-secondary text-muted-foreground"
-                          }`}
-                        >
-                          {i < captureStep ? (
-                            <CheckCircle2 className="h-3.5 w-3.5" />
-                          ) : (
-                            DIRECTION_ICONS[dir]
-                          )}
-                          {dir}
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
               {/* Ready to save */}
               <AnimatePresence>
@@ -424,22 +324,10 @@ export default function TrainPage() {
                     <div className="flex items-center gap-2 text-sm text-accent">
                       <CheckCircle2 className="h-4 w-4" />
                       <span className="font-medium">
-                        Gesture successfully trained with 4 directional samples!
+                        Gesture sample captured successfully!
                       </span>
                     </div>
 
-                    {/* Direction summary */}
-                    <div className="flex gap-2">
-                      {DIRECTIONS_ORDER.map((dir) => (
-                        <div
-                          key={dir}
-                          className="flex items-center gap-1 rounded-md bg-accent/20 px-2 py-1 text-xs font-mono text-accent"
-                        >
-                          <CheckCircle2 className="h-3 w-3" />
-                          {dir}
-                        </div>
-                      ))}
-                    </div>
 
                     {/* Voice recording */}
                     <div className="flex items-center gap-3">
@@ -487,35 +375,31 @@ export default function TrainPage() {
             {/* Training guide */}
             <div className="rounded-2xl border border-border bg-card p-5">
               <h3 className="mb-4 text-xs font-mono uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                <Compass className="h-4 w-4" />
-                Directional Training Guide
+                <Camera className="h-4 w-4" />
+                Training Guide
               </h3>
               <ol className="space-y-3 text-xs text-muted-foreground">
-                {DIRECTIONS_ORDER.map((dir, i) => (
-                  <li
-                    key={dir}
-                    className={`flex items-start gap-2 rounded-lg p-2 transition-colors ${
-                      isCapturing && captureStep === i
-                        ? "bg-primary/10 text-primary border border-primary/20"
-                        : captureStep > i
-                          ? "text-accent"
-                          : ""
-                    }`}
-                  >
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-bold">
-                      {captureStep > i ? "✓" : i + 1}
-                    </span>
-                    <div>
-                      <span className="font-medium text-foreground">{dir}</span>
-                      <p className="mt-0.5 text-muted-foreground">
-                        {dir === "NORTH" && "Show gesture facing front"}
-                        {dir === "WEST" && "Rotate hand to the left"}
-                        {dir === "SOUTH" && "Point hand downward"}
-                        {dir === "EAST" && "Rotate hand to the right"}
-                      </p>
-                    </div>
-                  </li>
-                ))}
+                <li className="flex items-start gap-2 rounded-lg p-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-bold">1</span>
+                  <div>
+                    <span className="font-medium text-foreground">Start Camera</span>
+                    <p className="mt-0.5 text-muted-foreground">Enable the webcam feed</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-2 rounded-lg p-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-bold">2</span>
+                  <div>
+                    <span className="font-medium text-foreground">Name & Show Gesture</span>
+                    <p className="mt-0.5 text-muted-foreground">Enter a name and show your hand gesture</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-2 rounded-lg p-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-bold">3</span>
+                  <div>
+                    <span className="font-medium text-foreground">Capture & Save</span>
+                    <p className="mt-0.5 text-muted-foreground">Capture the sample and save to library</p>
+                  </div>
+                </li>
               </ol>
             </div>
 
