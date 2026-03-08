@@ -63,7 +63,11 @@ export default function TrainPage() {
   const handleStop = useCallback(() => {
     stop();
     resetCapture();
-  }, [stop]);
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+      videoRef.current.load();
+    }
+  }, [stop, resetCapture]);
 
   const resetCapture = useCallback(() => {
     setIsCapturing(false);
