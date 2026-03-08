@@ -84,8 +84,8 @@ export default function TrainPage() {
     }
     resetCapture();
     setIsCapturing(true);
-    setCaptureStep(0);
-    toast.info("Show your gesture to the camera and click Capture Sample.");
+    setCapturePhase("right");
+    toast.info("Show your RIGHT hand gesture to the camera and click Capture.");
   }, [gestureName, resetCapture]);
 
   const captureSample = useCallback(() => {
@@ -98,11 +98,19 @@ export default function TrainPage() {
     setDirectionWarning(null);
     const newSamples = [...samples, [...lm]];
     setSamples(newSamples);
-    setCaptureStep(1);
-    setIsCapturing(false);
-    setReadyToSave(true);
-    toast.success("Gesture sample captured successfully!");
-  }, [landmarks, samples]);
+
+    if (capturePhase === "right") {
+      // Right hand captured, now ask for left
+      setCapturePhase("left");
+      toast.success("✋ Right hand captured! Now show your LEFT hand gesture.");
+    } else if (capturePhase === "left") {
+      // Both hands captured
+      setCapturePhase("done");
+      setIsCapturing(false);
+      setReadyToSave(true);
+      toast.success("🤚 Left hand captured! Both hands recorded. Ready to save!");
+    }
+  }, [landmarks, samples, capturePhase]);
 
   // Voice recording
   const startVoiceRecording = useCallback(async () => {
