@@ -14,7 +14,7 @@ export interface StoredGesture {
 }
 
 const DB_NAME = "signspeak-gestures";
-const DB_VERSION = 1;
+const DB_VERSION = 3;
 const STORE_NAME = "custom_gestures";
 
 function openDB(): Promise<IDBDatabase> {
@@ -24,6 +24,10 @@ function openDB(): Promise<IDBDatabase> {
       const db = req.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: "id" });
+      }
+      // Clean up legacy store from removed built-in gesture tracking
+      if (db.objectStoreNames.contains("deleted_builtin_gestures")) {
+        db.deleteObjectStore("deleted_builtin_gestures");
       }
     };
     req.onsuccess = () => resolve(req.result);
