@@ -21,7 +21,6 @@ import {
   saveGesture,
   deleteGesture,
   matchCustomGesture,
-  normalizeLandmarks,
 } from "@/lib/gestureStore";
 import type { Landmark } from "@/lib/gestureClassifier";
 import { toast } from "sonner";
