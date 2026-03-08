@@ -94,7 +94,12 @@ export function useHandDetection() {
           setGesture({ gesture: customMatch.name, confidence: customMatch.confidence });
         } else {
           const result = classifyGesture(lm, handedness);
-          setGesture(result);
+          // Skip disabled built-in gestures
+          if (disabledGesturesRef.current.includes(result.gesture)) {
+            setGesture(null);
+          } else {
+            setGesture(result);
+          }
         }
         lastGestureTimeRef.current = now;
       }
