@@ -118,10 +118,10 @@ function EmojiPicker({ currentEmoji, onSelect }: { currentEmoji: string; onSelec
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button className="group/emoji relative text-2xl mb-2 cursor-pointer hover:scale-110 transition-transform">
+        <button className="group/emoji relative text-2xl mb-2 cursor-pointer hover:scale-110 transition-transform" title="Click to change emoji">
           {currentEmoji || "👋"}
-          <span className="absolute -bottom-1 -right-1 opacity-0 group-hover/emoji:opacity-100 transition-opacity bg-muted rounded-full p-0.5">
-            <Pencil className="h-2.5 w-2.5 text-muted-foreground" />
+          <span className="absolute -bottom-1 -right-1 bg-accent/80 rounded-full p-0.5 ring-1 ring-accent">
+            <Pencil className="h-2.5 w-2.5 text-accent-foreground" />
           </span>
         </button>
       </PopoverTrigger>
