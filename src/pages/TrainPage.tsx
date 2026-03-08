@@ -73,9 +73,9 @@ export default function TrainPage() {
     const interval = setInterval(() => {
       if (landmarks && landmarks.length > 0) {
         setSamples((prev) => {
-          if (prev.length >= 30) {
+          if (prev.length >= 5) {
             setIsCapturing(false);
-            toast.success("Captured 30 samples!");
+            toast.success("Captured 5 samples! You can save now.");
             return prev;
           }
           return [...prev, [...landmarks[0]]];
