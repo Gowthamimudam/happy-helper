@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, Sparkles, Mic, MicOff, Play, Upload, Pencil, X, Check, Save } from "lucide-react";
-import { getAllGestures, deleteGesture, saveGesture, type StoredGesture } from "@/lib/gestureStore";
+import { Trash2, Sparkles, Mic, MicOff, Play, Upload, Pencil, X, Check, Save, Download, FileUp } from "lucide-react";
+import { getAllGestures, deleteGesture, saveGesture, exportGestures, importGestures, type StoredGesture } from "@/lib/gestureStore";
 import { saveVoice, getVoice, deleteVoice } from "@/lib/voiceStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
