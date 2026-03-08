@@ -44,6 +44,10 @@ export default function DetectionPage() {
   const handleStop = useCallback(() => {
     stop();
     stopSpeaking();
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+      videoRef.current.load();
+    }
   }, [stop, stopSpeaking]);
 
   return (

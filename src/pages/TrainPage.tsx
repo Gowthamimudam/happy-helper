@@ -60,11 +60,6 @@ export default function TrainPage() {
     if (videoRef.current) await start(videoRef.current);
   }, [start]);
 
-  const handleStop = useCallback(() => {
-    stop();
-    resetCapture();
-  }, [stop]);
-
   const resetCapture = useCallback(() => {
     setIsCapturing(false);
     setCapturePhase("idle");
@@ -74,6 +69,15 @@ export default function TrainPage() {
     setDirectionWarning(null);
     setGestureEmoji("");
   }, []);
+
+  const handleStop = useCallback(() => {
+    stop();
+    resetCapture();
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+      videoRef.current.load();
+    }
+  }, [stop, resetCapture]);
 
   
 

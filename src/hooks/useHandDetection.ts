@@ -115,12 +115,15 @@ export function useHandDetection() {
 
   const stop = useCallback(() => {
     cancelAnimationFrame(animationFrameRef.current);
+    animationFrameRef.current = 0;
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     }
     if (videoRef.current) {
       videoRef.current.srcObject = null;
+      videoRef.current.load();
+      videoRef.current = null;
     }
     setIsRunning(false);
     setGesture(null);
