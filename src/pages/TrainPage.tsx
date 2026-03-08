@@ -39,6 +39,7 @@ export default function TrainPage() {
 
   const [gestureName, setGestureName] = useState("");
   const [gestureEmoji, setGestureEmoji] = useState("");
+  const [gestureHand, setGestureHand] = useState<HandType>("right");
   const [samples, setSamples] = useState<Landmark[][]>([]);
   const [captureStep, setCaptureStep] = useState(0);
   const [isCapturing, setIsCapturing] = useState(false);
