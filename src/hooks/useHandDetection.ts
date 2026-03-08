@@ -86,11 +86,11 @@ export function useHandDetection() {
       const handedness = results.handednesses?.[0]?.[0]?.categoryName ?? "Right";
       setLandmarks(results.landmarks as Landmark[][]);
 
-      // Throttle gesture updates to avoid flicker
-      if (now - lastGestureTimeRef.current > 300) {
+      // Throttle gesture updates — fast response
+      if (now - lastGestureTimeRef.current > 100) {
         // Check custom gestures first (higher priority)
         const customMatch = matchCustomGesture(lm, customGesturesRef.current);
-        if (customMatch && customMatch.confidence > 0.5) {
+        if (customMatch && customMatch.confidence > 0.3) {
           setGesture({ gesture: customMatch.name, confidence: customMatch.confidence });
         } else {
           const result = classifyGesture(lm, handedness);

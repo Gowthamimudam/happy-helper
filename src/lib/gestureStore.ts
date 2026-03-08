@@ -8,6 +8,7 @@ import type { Landmark } from "./gestureClassifier";
 export interface StoredGesture {
   id: string;
   name: string;
+  emoji: string; // user-chosen emoji for this gesture
   samples: Landmark[][]; // each sample is 21 landmarks
   createdAt: number;
 }
@@ -108,7 +109,7 @@ export function landmarkDistance(a: number[], b: number[]): number {
 export function matchCustomGesture(
   liveLandmarks: Landmark[],
   storedGestures: StoredGesture[],
-  threshold = 0.18
+  threshold = 0.25
 ): { name: string; confidence: number } | null {
   const liveNorm = normalizeLandmarks(liveLandmarks);
   let bestName = "";

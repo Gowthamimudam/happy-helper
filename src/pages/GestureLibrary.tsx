@@ -173,7 +173,7 @@ export default function GestureLibrary() {
                     transition={{ delay: i * 0.05 }}
                     className="group relative rounded-xl border border-accent/30 bg-accent/5 p-4 transition-colors hover:border-accent/50"
                   >
-                    <div className="mb-2 text-2xl">🤟</div>
+                    <div className="mb-2 text-2xl">{g.emoji || "🤟"}</div>
                     <h3 className="font-semibold text-foreground font-display">{g.name}</h3>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {g.samples.length} samples • Custom trained
