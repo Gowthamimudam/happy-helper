@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, Sparkles, Mic, MicOff, Play } from "lucide-react";
-import { getAllGestures, deleteGesture, type StoredGesture } from "@/lib/gestureStore";
+import { Trash2, Sparkles, Mic, MicOff, Play, Pencil } from "lucide-react";
+import { getAllGestures, deleteGesture, saveGesture, type StoredGesture } from "@/lib/gestureStore";
 import { saveVoice, getVoice, deleteVoice } from "@/lib/voiceStore";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,8 +14,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+
+const EMOJI_OPTIONS = [
+  "👋", "✋", "🤚", "🖐️", "✌️", "🤞", "🤟", "🤘", "🤙", "👈", "👉", "👆", "👇", "☝️", "👍", "👎",
+  "✊", "👊", "🤛", "🤜", "👏", "🙌", "🤝", "🙏", "💪", "🖖", "🫰", "🫵", "🫱", "🫲",
+  "❤️", "⭐", "🔥", "💯", "✅", "❌", "⚡", "🎯", "🎉", "💡",
+];
 
 function VoiceRecordButton({ gestureName }: { gestureName: string }) {
   const [isRecording, setIsRecording] = useState(false);
@@ -102,6 +113,36 @@ function VoiceRecordButton({ gestureName }: { gestureName: string }) {
   );
 }
 
+function EmojiPicker({ currentEmoji, onSelect }: { currentEmoji: string; onSelect: (emoji: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button className="group/emoji relative text-2xl mb-2 cursor-pointer hover:scale-110 transition-transform">
+          {currentEmoji || "👋"}
+          <span className="absolute -bottom-1 -right-1 opacity-0 group-hover/emoji:opacity-100 transition-opacity bg-muted rounded-full p-0.5">
+            <Pencil className="h-2.5 w-2.5 text-muted-foreground" />
+          </span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-64 p-2" align="start">
+        <p className="text-xs text-muted-foreground mb-2 font-mono">Choose emoji</p>
+        <div className="grid grid-cols-8 gap-1">
+          {EMOJI_OPTIONS.map((emoji) => (
+            <button
+              key={emoji}
+              onClick={() => { onSelect(emoji); setOpen(false); }}
+              className={`text-lg p-1 rounded hover:bg-accent/20 transition-colors ${emoji === currentEmoji ? "bg-accent/30 ring-1 ring-accent" : ""}`}
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export default function GestureLibrary() {
   const navigate = useNavigate();
   const [customGestures, setCustomGestures] = useState<StoredGesture[]>([]);
@@ -113,6 +154,12 @@ export default function GestureLibrary() {
 
   useEffect(() => {
     void refreshLibrary();
+  }, [refreshLibrary]);
+
+  const handleEmojiChange = useCallback(async (gesture: StoredGesture, newEmoji: string) => {
+    await saveGesture({ ...gesture, emoji: newEmoji });
+    await refreshLibrary();
+    toast.success(`Emoji updated for "${gesture.name}"`);
   }, [refreshLibrary]);
 
   const confirmDelete = useCallback(async () => {
@@ -168,7 +215,7 @@ export default function GestureLibrary() {
                     transition={{ delay: i * 0.05 }}
                     className="group relative rounded-xl border border-accent/30 bg-accent/5 p-4 transition-colors hover:border-accent/50"
                   >
-                    <div className="mb-2 text-2xl">{g.emoji || "👋"}</div>
+                    <EmojiPicker currentEmoji={g.emoji || "👋"} onSelect={(emoji) => handleEmojiChange(g, emoji)} />
                     <h3 className="font-semibold text-foreground font-display">{g.name}</h3>
                     <p className="mt-1 text-xs text-muted-foreground">
                       Both hands • {g.samples.length} sample{g.samples.length !== 1 ? "s" : ""}
