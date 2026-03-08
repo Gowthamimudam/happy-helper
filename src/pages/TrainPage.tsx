@@ -280,38 +280,55 @@ export default function TrainPage() {
               </div>
 
               {isRunning && !readyToSave && (
-                <div className="flex gap-3 items-end">
-                  <div className="flex-1 space-y-1.5">
-                    <label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                      Gesture Name
-                    </label>
-                    <Input
-                      value={gestureName}
-                      onChange={(e) => setGestureName(e.target.value)}
-                      placeholder='e.g. "Hello", "Thanks", "Water"'
-                      className="bg-secondary border-border"
-                      disabled={isCapturing}
-                    />
+                <div className="space-y-3">
+                  <div className="flex gap-3 items-end">
+                    <div className="flex-1 space-y-1.5">
+                      <label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+                        Gesture Name
+                      </label>
+                      <Input
+                        value={gestureName}
+                        onChange={(e) => setGestureName(e.target.value)}
+                        placeholder='e.g. "Hello", "Thanks", "Water"'
+                        className="bg-secondary border-border"
+                        disabled={isCapturing}
+                      />
+                    </div>
+                    <div className="w-20 space-y-1.5">
+                      <label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+                        Emoji
+                      </label>
+                      <Input
+                        value={gestureEmoji}
+                        onChange={(e) => setGestureEmoji(e.target.value)}
+                        placeholder="👋"
+                        className="bg-secondary border-border text-center text-lg"
+                        disabled={isCapturing}
+                        maxLength={4}
+                      />
+                    </div>
                   </div>
-                  {!isCapturing ? (
-                    <Button
-                      onClick={startCapturing}
-                      disabled={!gestureName.trim()}
-                      className="bg-accent text-accent-foreground hover:bg-accent/90"
-                    >
-                      <Camera className="mr-2 h-4 w-4" />
-                      Start Training
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={captureSample}
-                      size="lg"
-                      className="bg-accent text-accent-foreground hover:bg-accent/90 text-base px-6"
-                    >
-                      <Camera className="mr-2 h-4 w-4" />
-                      Capture Sample
-                    </Button>
-                  )}
+                  <div className="flex gap-3">
+                    {!isCapturing ? (
+                      <Button
+                        onClick={startCapturing}
+                        disabled={!gestureName.trim()}
+                        className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90"
+                      >
+                        <Camera className="mr-2 h-4 w-4" />
+                        Start Training
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={captureSample}
+                        size="lg"
+                        className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 text-base px-6"
+                      >
+                        <Camera className="mr-2 h-4 w-4" />
+                        Capture Sample
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
 

@@ -90,7 +90,7 @@ export function useHandDetection() {
       if (now - lastGestureTimeRef.current > 100) {
         // Check custom gestures first (higher priority)
         const customMatch = matchCustomGesture(lm, customGesturesRef.current);
-        if (customMatch && customMatch.confidence > 0.5) {
+        if (customMatch && customMatch.confidence > 0.3) {
           setGesture({ gesture: customMatch.name, confidence: customMatch.confidence });
         } else {
           const result = classifyGesture(lm, handedness);

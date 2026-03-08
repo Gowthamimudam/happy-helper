@@ -109,7 +109,7 @@ export function landmarkDistance(a: number[], b: number[]): number {
 export function matchCustomGesture(
   liveLandmarks: Landmark[],
   storedGestures: StoredGesture[],
-  threshold = 0.18
+  threshold = 0.25
 ): { name: string; confidence: number } | null {
   const liveNorm = normalizeLandmarks(liveLandmarks);
   let bestName = "";
