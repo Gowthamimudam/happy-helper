@@ -78,6 +78,19 @@ function VoiceRecordButton({ gestureName }: { gestureName: string }) {
     }
   }, [gestureName]);
 
+  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("audio/")) {
+      toast.error("Please upload an audio file");
+      return;
+    }
+    await saveVoice(gestureName, file);
+    setHasVoice(true);
+    toast.success(`Voice uploaded for "${gestureName}"`);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, [gestureName]);
+
   return (
     <div className="flex items-center gap-1 mt-2">
       {!isRecording ? (
