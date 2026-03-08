@@ -171,7 +171,7 @@ export default function GestureLibrary() {
                     <div className="mb-2 text-2xl">{g.emoji || "👋"}</div>
                     <h3 className="font-semibold text-foreground font-display">{g.name}</h3>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {g.samples.length} sample{g.samples.length !== 1 ? "s" : ""} • Custom trained
+                      {g.hand === "left" ? "🤚 Left" : "✋ Right"} hand • {g.samples.length} sample{g.samples.length !== 1 ? "s" : ""}
                     </p>
                     <div className="flex items-center gap-1 mt-2">
                       <VoiceRecordButton gestureName={g.name} />

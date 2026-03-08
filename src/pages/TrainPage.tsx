@@ -18,6 +18,7 @@ import HandCanvas from "@/components/HandCanvas";
 import { useHandDetection } from "@/hooks/useHandDetection";
 import {
   type StoredGesture,
+  type HandType,
   getAllGestures,
   saveGesture,
   deleteGesture,
@@ -38,6 +39,7 @@ export default function TrainPage() {
 
   const [gestureName, setGestureName] = useState("");
   const [gestureEmoji, setGestureEmoji] = useState("");
+  const [gestureHand, setGestureHand] = useState<HandType>("right");
   const [samples, setSamples] = useState<Landmark[][]>([]);
   const [captureStep, setCaptureStep] = useState(0);
   const [isCapturing, setIsCapturing] = useState(false);
@@ -142,6 +144,7 @@ export default function TrainPage() {
       id: `custom_${Date.now()}`,
       name: gestureName.trim(),
       emoji: gestureEmoji.trim() || "👋",
+      hand: gestureHand,
       samples,
       createdAt: Date.now(),
     };
@@ -154,7 +157,7 @@ export default function TrainPage() {
     );
     // Redirect to gesture library
     setTimeout(() => navigate("/gestures"), 1200);
-  }, [samples, gestureName, gestureEmoji, voiceBlob, navigate]);
+  }, [samples, gestureName, gestureEmoji, gestureHand, voiceBlob, navigate]);
 
   const handleDelete = useCallback(async (id: string) => {
     await deleteGesture(id);
@@ -306,6 +309,34 @@ export default function TrainPage() {
                         disabled={isCapturing}
                         maxLength={4}
                       />
+                    </div>
+                  </div>
+                  {/* Hand selector */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+                      Hand
+                    </label>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={gestureHand === "left" ? "default" : "outline"}
+                        onClick={() => setGestureHand("left")}
+                        disabled={isCapturing}
+                        className="flex-1 gap-1.5"
+                      >
+                        🤚 Left
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={gestureHand === "right" ? "default" : "outline"}
+                        onClick={() => setGestureHand("right")}
+                        disabled={isCapturing}
+                        className="flex-1 gap-1.5"
+                      >
+                        ✋ Right
+                      </Button>
                     </div>
                   </div>
                   <div className="flex gap-3">
