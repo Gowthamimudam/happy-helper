@@ -72,7 +72,7 @@ export default function TrainPage() {
     setDirectionWarning(null);
   }, []);
 
-  const currentDirection = DIRECTIONS_ORDER[captureStep] ?? "NORTH";
+  
 
   const startCapturing = useCallback(() => {
     if (!gestureName.trim()) {
