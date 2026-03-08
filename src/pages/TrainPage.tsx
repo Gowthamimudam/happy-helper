@@ -394,35 +394,31 @@ export default function TrainPage() {
             {/* Training guide */}
             <div className="rounded-2xl border border-border bg-card p-5">
               <h3 className="mb-4 text-xs font-mono uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                <Compass className="h-4 w-4" />
-                Directional Training Guide
+                <Camera className="h-4 w-4" />
+                Training Guide
               </h3>
               <ol className="space-y-3 text-xs text-muted-foreground">
-                {DIRECTIONS_ORDER.map((dir, i) => (
-                  <li
-                    key={dir}
-                    className={`flex items-start gap-2 rounded-lg p-2 transition-colors ${
-                      isCapturing && captureStep === i
-                        ? "bg-primary/10 text-primary border border-primary/20"
-                        : captureStep > i
-                          ? "text-accent"
-                          : ""
-                    }`}
-                  >
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-bold">
-                      {captureStep > i ? "✓" : i + 1}
-                    </span>
-                    <div>
-                      <span className="font-medium text-foreground">{dir}</span>
-                      <p className="mt-0.5 text-muted-foreground">
-                        {dir === "NORTH" && "Show gesture facing front"}
-                        {dir === "WEST" && "Rotate hand to the left"}
-                        {dir === "SOUTH" && "Point hand downward"}
-                        {dir === "EAST" && "Rotate hand to the right"}
-                      </p>
-                    </div>
-                  </li>
-                ))}
+                <li className="flex items-start gap-2 rounded-lg p-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-bold">1</span>
+                  <div>
+                    <span className="font-medium text-foreground">Start Camera</span>
+                    <p className="mt-0.5 text-muted-foreground">Enable the webcam feed</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-2 rounded-lg p-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-bold">2</span>
+                  <div>
+                    <span className="font-medium text-foreground">Name & Show Gesture</span>
+                    <p className="mt-0.5 text-muted-foreground">Enter a name and show your hand gesture</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-2 rounded-lg p-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-bold">3</span>
+                  <div>
+                    <span className="font-medium text-foreground">Capture & Save</span>
+                    <p className="mt-0.5 text-muted-foreground">Capture the sample and save to library</p>
+                  </div>
+                </li>
               </ol>
             </div>
 
