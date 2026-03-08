@@ -8,6 +8,7 @@ import type { Landmark } from "./gestureClassifier";
 export interface StoredGesture {
   id: string;
   name: string;
+  emoji: string; // user-chosen emoji for this gesture
   samples: Landmark[][]; // each sample is 21 landmarks
   createdAt: number;
 }
