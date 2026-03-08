@@ -184,7 +184,9 @@ export default function GestureLibrary() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   const refreshLibrary = useCallback(async () => {
-    setCustomGestures(await getAllGestures());
+    const all = await getAllGestures();
+    // Only show custom gestures (not alphabet/number gestures)
+    setCustomGestures(all.filter((g) => !g.name.startsWith("alpha_") && !g.name.startsWith("num_")));
   }, []);
 
   useEffect(() => {

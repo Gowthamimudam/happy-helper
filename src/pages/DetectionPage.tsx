@@ -140,10 +140,10 @@ export default function DetectionPage() {
                 <Button
                   onClick={handleStop}
                   variant="destructive"
-                  className="flex-1"
+                  className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
                   <Square className="mr-2 h-4 w-4" />
-                  Stop
+                  Stop Camera
                 </Button>
               )}
               <Button
