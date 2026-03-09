@@ -49,17 +49,24 @@ export function useHandDetection(filter: GestureFilter = "all") {
     setError(null);
     try {
       const vision = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.32/wasm"
       );
-      handLandmarkerRef.current = await HandLandmarker.createFromOptions(vision, {
+      const options = {
         baseOptions: {
           modelAssetPath:
             "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
-          delegate: "GPU",
+          delegate: "GPU" as const,
         },
-        runningMode: "VIDEO",
+        runningMode: "VIDEO" as const,
         numHands: 2,
-      });
+      };
+      try {
+        handLandmarkerRef.current = await HandLandmarker.createFromOptions(vision, options);
+      } catch (gpuErr) {
+        console.warn("GPU delegate failed, falling back to CPU:", gpuErr);
+        options.baseOptions.delegate = "CPU" as any;
+        handLandmarkerRef.current = await HandLandmarker.createFromOptions(vision, options);
+      }
     } catch (e) {
       console.error("Failed to initialize HandLandmarker:", e);
       setError("Failed to load AI model. Please refresh and try again.");
