@@ -18,9 +18,7 @@ export default function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 border border-primary/30">
-            <Hand className="h-5 w-5 text-primary" />
-          </div>
+          <img src="/logo.png" alt="SignSpeak logo" className="h-9 w-9 rounded-lg" />
           <span className="text-lg font-bold tracking-tight">
             Sign<span className="text-gradient">Speak</span>
           </span>
