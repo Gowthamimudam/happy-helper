@@ -10,6 +10,7 @@ import GestureLibrary from "./pages/GestureLibrary";
 import TrainPage from "./pages/TrainPage";
 import AlphabetMode from "./pages/AlphabetMode";
 import NumbersMode from "./pages/NumbersMode";
+import Poster from "./pages/Poster";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/train" element={<TrainPage />} />
           <Route path="/alphabet" element={<AlphabetMode />} />
           <Route path="/numbers" element={<NumbersMode />} />
+          <Route path="/poster" element={<Poster />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
