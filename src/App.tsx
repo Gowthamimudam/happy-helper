@@ -29,6 +29,7 @@ const App = () => (
           <Route path="/train" element={<TrainPage />} />
           <Route path="/alphabet" element={<AlphabetMode />} />
           <Route path="/numbers" element={<NumbersMode />} />
+          <Route path="/poster" element={<Poster />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
