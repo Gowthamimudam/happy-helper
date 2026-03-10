@@ -10,6 +10,7 @@ import GestureLibrary from "./pages/GestureLibrary";
 import TrainPage from "./pages/TrainPage";
 import AlphabetMode from "./pages/AlphabetMode";
 import NumbersMode from "./pages/NumbersMode";
+import Poster from "./pages/Poster";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
